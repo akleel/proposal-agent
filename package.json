@@ -13,6 +13,11 @@
                     "db:down":  "docker compose down",
                     "db:migrate":  "pnpm --filter @proposal-agent/db migrate",
                     "test:integration":  "pnpm --filter @proposal-agent/db test:integration",
-                    "check":  "pnpm lint \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build"
-                }
+                    "check":  "pnpm lint \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
+                    "test:e2e":  "playwright test",
+                    "test:e2e:headed":  "playwright test --headed"
+                },
+    "devDependencies":  {
+                            "@playwright/test":  "^1.62.1"
+                        }
 }
