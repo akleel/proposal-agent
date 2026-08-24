@@ -3,7 +3,6 @@ import {
   describe,
   expect,
   it,
-  vi,
 } from "vitest";
 
 import {
@@ -21,7 +20,7 @@ function createExtraction(): InquiryExtraction {
     },
     rooms: {
       value: 35,
-      confidence: 0.97,
+      confidence: 0.98,
       source: "35 rooms",
       requiresReview: false,
     },
@@ -39,7 +38,7 @@ function createExtraction(): InquiryExtraction {
     },
     budgetCents: {
       value: 18_000_000,
-      confidence: 0.98,
+      confidence: 0.99,
       source: "SEK 180,000",
       requiresReview: false,
     },
@@ -54,17 +53,26 @@ function createExtraction(): InquiryExtraction {
   };
 }
 
+class RecordingInquiryExtractor implements InquiryExtractor {
+  public readonly inputs: string[] = [];
+
+  public constructor(
+    private readonly result: InquiryExtraction,
+  ) {}
+
+  public async extract(
+    rawText: string,
+  ): Promise<InquiryExtraction> {
+    this.inputs.push(rawText);
+
+    return this.result;
+  }
+}
+
 describe("extractInquiry", () => {
-  it("normalizes input and delegates extraction to the configured port", async () => {
+  it("trims input and delegates extraction to the port", async () => {
     const extraction = createExtraction();
-
-    const extract = vi
-      .fn<InquiryExtractor["extract"]>()
-      .mockResolvedValue(extraction);
-
-    const extractor: InquiryExtractor = {
-      extract,
-    };
+    const extractor = new RecordingInquiryExtractor(extraction);
 
     const result = await extractInquiry(
       {
@@ -76,20 +84,17 @@ describe("extractInquiry", () => {
       },
     );
 
-    expect(extract).toHaveBeenCalledOnce();
-    expect(extract).toHaveBeenCalledWith(
+    expect(extractor.inputs).toEqual([
       "We need 35 rooms for 65 people in Stockholm.",
-    );
+    ]);
+
     expect(result).toBe(extraction);
   });
 
   it("rejects blank input before invoking the extractor", async () => {
-    const extract = vi
-      .fn<InquiryExtractor["extract"]>();
-
-    const extractor: InquiryExtractor = {
-      extract,
-    };
+    const extractor = new RecordingInquiryExtractor(
+      createExtraction(),
+    );
 
     await expect(
       extractInquiry(
@@ -100,8 +105,10 @@ describe("extractInquiry", () => {
           rawText: "   ",
         },
       ),
-    ).rejects.toThrow("Inquiry text cannot be empty.");
+    ).rejects.toThrow(
+      "Inquiry text cannot be empty.",
+    );
 
-    expect(extract).not.toHaveBeenCalled();
+    expect(extractor.inputs).toEqual([]);
   });
 });

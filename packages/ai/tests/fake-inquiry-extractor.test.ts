@@ -53,21 +53,22 @@ function createExtraction(): InquiryExtraction {
 }
 
 describe("FakeInquiryExtractor", () => {
-  it("returns its configured deterministic extraction", async () => {
+  it("returns the configured extraction", async () => {
     const extraction = createExtraction();
-    const extractor = new FakeInquiryExtractor(extraction);
+
+    const extractor =
+      new FakeInquiryExtractor(extraction);
 
     const result = await extractor.extract(
-      "We need a company offsite in Stockholm.",
+      "Company offsite inquiry",
     );
 
     expect(result).toBe(extraction);
   });
 
-  it("records every inquiry passed to the adapter", async () => {
-    const extractor = new FakeInquiryExtractor(
-      createExtraction(),
-    );
+  it("records received inquiry text", async () => {
+    const extractor =
+      new FakeInquiryExtractor(createExtraction());
 
     await extractor.extract("First inquiry");
     await extractor.extract("Second inquiry");

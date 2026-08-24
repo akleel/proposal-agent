@@ -2,11 +2,9 @@ import type { InquiryExtractor } from "@proposal-agent/application";
 import type { InquiryExtraction } from "@proposal-agent/domain";
 
 /**
- * Deterministic development and test adapter.
+ * Deterministic adapter for tests and development.
  *
- * It intentionally performs no interpretation. A configured extraction is
- * returned for every input so application behavior can be exercised without
- * a model provider, network access, prompts, or nondeterministic output.
+ * It performs no interpretation and makes no network calls.
  */
 export class FakeInquiryExtractor implements InquiryExtractor {
   private readonly recordedInputs: string[] = [];
