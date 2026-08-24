@@ -1,4 +1,4 @@
-﻿export interface Inquiry {
+export interface Inquiry {
   readonly id: string;
   readonly rawText: string;
   readonly createdAt: Date;
@@ -7,7 +7,7 @@
 export interface ReviewableField<T> {
   readonly value: T;
   readonly confidence: number;
-  readonly source: string;
+  readonly source: string | null;
   readonly requiresReview: boolean;
 }
 
@@ -22,7 +22,7 @@ export interface InquiryExtraction {
 
 export interface ReviewIssue {
   readonly field: string;
-  readonly source: string;
+  readonly source: string | null;
   readonly confidence: number;
 }
 

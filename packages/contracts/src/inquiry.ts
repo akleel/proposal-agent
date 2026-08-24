@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 const confidenceSchema = z.number().min(0).max(1);
 
@@ -8,7 +8,7 @@ export const reviewableFieldSchema = <T extends z.ZodType>(
   z.object({
     value: valueSchema,
     confidence: confidenceSchema,
-    source: z.string().min(1),
+    source: z.string().min(1).nullable(),
     requiresReview: z.boolean(),
   });
 

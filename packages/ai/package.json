@@ -12,9 +12,13 @@
   },
   "dependencies": {
     "@proposal-agent/application": "workspace:*",
-    "@proposal-agent/domain": "workspace:*"
+    "@proposal-agent/contracts": "workspace:*",
+    "@proposal-agent/domain": "workspace:*",
+    "openai": "^7.5.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "tsx": "^4.23.12",
     "typescript": "^5.0.0",
     "vitest": "^3.2.7"
   }
