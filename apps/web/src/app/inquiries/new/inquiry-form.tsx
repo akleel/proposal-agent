@@ -70,8 +70,9 @@ export function InquiryForm() {
           id="rawText-help"
           className="text-sm text-zinc-500"
         >
-          Paste the original customer request. AI extraction
-          will be added in a later milestone.
+          Paste the original customer request. After saving, you
+          can run guarded AI extraction and review the evidence
+          before downstream use.
         </p>
 
         {errors.length > 0 ? (

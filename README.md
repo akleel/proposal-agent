@@ -29,14 +29,16 @@ approval, or final proposal state.
 | PostgreSQL integration tests | Implemented |
 | Playwright browser E2E | Implemented |
 | GitHub Actions CI | Implemented |
-| AI extraction in browser UI | Next |
-| Human review UI | Next |
+| AI extraction in browser UI | Implemented |
+| Human review UI | Implemented |
 | Deterministic pricing engine | Planned |
 | Review-ready proposal draft | Planned |
 | MCP proposal tools | Planned |
 
-The persisted browser flow and guarded AI extraction flow both work today.
-They are intentionally not composed together yet.
+The persisted browser flow and guarded AI extraction flow are now composed on
+the inquiry detail page. AI extraction runs only when the user explicitly
+requests it, and deterministic review flags remain visible before downstream
+use.
 
 ## What the system extracts
 
@@ -280,16 +282,16 @@ into the model.
 
 ## Roadmap
 
-The next vertical slice is:
+The current vertical slice is:
 
 ```text
 persisted inquiry
       |
       v
-AI extraction
+explicit AI extraction
       |
       v
-review issues
+deterministic review issues
       |
       v
 human review UI

@@ -70,9 +70,11 @@ deterministic review policy
 InquiryExtraction
 ```
 
-This slice is currently exercised through live evaluation scripts.
+The AI slice is now composed into the inquiry detail page behind an explicit
+user-triggered extraction action.
 
-It is not yet composed into the browser inquiry route.
+Page loads and reloads do not automatically call the model. Provider calls
+remain intentional while the raw persisted inquiry stays the durable source.
 
 ## 3. Dependency direction
 
@@ -583,36 +585,25 @@ browser E2E
 The AI boundary remains covered by deterministic tests without requiring an
 OpenAI API key in CI.
 
-## 16. Current composition gap
+## 16. Current composed slice
 
-The repository currently has two implemented slices that are not yet connected:
+The persisted inquiry and AI interpretation slices are now connected through
+the inquiry detail page.
 
-```text
-persisted browser inquiry
+The flow is:
 
-          X
+create inquiry -> persist raw inquiry -> open inquiry detail -> explicit AI
+extraction -> deterministic review issues -> human review UI.
 
-AI extraction + review information
-```
+The model is not called on page load or reload. Extraction only happens after
+an explicit user action.
 
-The next product-facing vertical slice connects them:
+The extraction result is intentionally transient at this stage. The original
+customer inquiry remains persisted, while the current extraction and review
+queue live in the page session.
 
-```text
-create inquiry
-  |
-  v
-persist raw inquiry
-  |
-  v
-extract requirements
-  |
-  v
-calculate review issues
-  |
-  v
-show human review UI
-```
-
+The next persistence boundary should capture reviewed extraction data and human
+review decisions before authoritative pricing or proposal drafting is added.
 ## 17. Future deterministic tools
 
 Future proposal capabilities may include:

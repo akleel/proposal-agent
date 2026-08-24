@@ -10,9 +10,11 @@
                     "typecheck":  "next typegen \u0026\u0026 tsc --noEmit"
                 },
     "dependencies":  {
+                         "@proposal-agent/ai": "workspace:*",
                          "@proposal-agent/application":  "workspace:*",
                          "@proposal-agent/contracts":  "workspace:*",
                          "@proposal-agent/db":  "workspace:*",
+                         "@proposal-agent/domain": "workspace:*",
                          "next":  "16.3.1",
                          "react":  "19.2.8",
                          "react-dom":  "19.2.8",

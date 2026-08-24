@@ -14,6 +14,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@proposal-agent/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@proposal-agent/application':
         specifier: workspace:*
         version: link:../../packages/application
@@ -23,6 +26,9 @@ importers:
       '@proposal-agent/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@proposal-agent/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       next:
         specifier: 16.3.1
         version: 16.3.1(@babel/core@7.29.7(supports-color@7.2.0))(@playwright/test@1.62.1)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
