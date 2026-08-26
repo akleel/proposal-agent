@@ -28,7 +28,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await pool.query("TRUNCATE TABLE inquiries");
+  await pool.query("TRUNCATE TABLE inquiries CASCADE");
 });
 
 afterAll(async () => {

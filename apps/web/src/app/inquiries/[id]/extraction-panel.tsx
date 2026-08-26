@@ -1,15 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
-
-import { extractInquiryAction } from "./actions";
 import {
-  initialExtractInquiryActionState,
+  useActionState,
+} from "react";
+import {
+  useFormStatus,
+} from "react-dom";
+
+import {
+  inquiryReviewWorkflowAction,
+} from "./actions";
+import {
+  createInitialInquiryReviewActionState,
+  type InquiryExtractionResult,
+  type InquiryReviewDecisionResult,
 } from "./types";
 
 interface ExtractionPanelProps {
   readonly inquiryId: string;
+  readonly initialResult:
+    InquiryExtractionResult | null;
 }
 
 interface ReviewFieldProps {
@@ -20,18 +30,45 @@ interface ReviewFieldProps {
   readonly requiresReview: boolean;
 }
 
-function formatConfidence(confidence: number): string {
-  return `${Math.round(confidence * 100)}%`;
+function formatConfidence(
+  confidence: number,
+): string {
+  return `${Math.round(
+    confidence * 100,
+  )}%`;
 }
 
-function formatReviewIssueField(field: string): string {
-  const labels: Readonly<Record<string, string>> = {
-    guests: "Guests",
-    rooms: "Rooms",
-    startDate: "Start date",
-    endDate: "End date",
-    budgetCents: "Budget",
-  };
+function formatNullableValue(
+  value:
+    | string
+    | number
+    | null,
+): string {
+  if (value === null) {
+    return "Not resolved";
+  }
+
+  if (typeof value === "number") {
+    return value.toLocaleString(
+      "en-US",
+    );
+  }
+
+  return value;
+}
+
+function formatReviewIssueField(
+  field: string,
+): string {
+  const labels:
+    Readonly<Record<string, string>> = {
+      guests: "Guests",
+      rooms: "Rooms",
+      startDate: "Start date",
+      endDate: "End date",
+      budgetCents:
+        "Budget (minor units)",
+    };
 
   const label = labels[field];
 
@@ -39,27 +76,74 @@ function formatReviewIssueField(field: string): string {
     return label;
   }
 
-  const requirementMatch = /^requirements\.(\d+)$/.exec(field);
+  const requirementMatch =
+    /^requirements\.(\d+)$/.exec(
+      field,
+    );
 
   if (requirementMatch) {
-    return `Requirement ${Number(requirementMatch[1]) + 1}`;
+    return `Requirement ${
+      Number(requirementMatch[1]) + 1
+    }`;
   }
 
   return field;
 }
 
-function formatNullableValue(
-  value: string | number | null,
-): string {
-  if (value === null) {
-    return "Not resolved";
+function getCandidateValue(
+  result: InquiryExtractionResult,
+  field: string,
+): string | number | null {
+  switch (field) {
+    case "guests":
+      return result.extraction.guests.value;
+    case "rooms":
+      return result.extraction.rooms.value;
+    case "startDate":
+      return result.extraction.startDate.value;
+    case "endDate":
+      return result.extraction.endDate.value;
+    case "budgetCents":
+      return result.extraction.budgetCents.value;
+    default:
+      break;
   }
 
-  if (typeof value === "number") {
-    return value.toLocaleString("en-US");
+  const requirementMatch =
+    /^requirements\.(\d+)$/.exec(
+      field,
+    );
+
+  if (!requirementMatch) {
+    return null;
   }
 
-  return value;
+  return (
+    result.extraction.requirements[
+      Number(requirementMatch[1])
+    ]?.value ?? null
+  );
+}
+
+function getCorrectionInputType(
+  field: string,
+): "date" | "number" | "text" {
+  if (
+    field === "startDate" ||
+    field === "endDate"
+  ) {
+    return "date";
+  }
+
+  if (
+    field === "guests" ||
+    field === "rooms" ||
+    field === "budgetCents"
+  ) {
+    return "number";
+  }
+
+  return "text";
 }
 
 function ReviewBadge({
@@ -67,17 +151,17 @@ function ReviewBadge({
 }: {
   readonly requiresReview: boolean;
 }) {
-  if (requiresReview) {
-    return (
-      <span className="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
-        Review required
-      </span>
-    );
-  }
-
   return (
-    <span className="inline-flex rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">
-      No review flag
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${
+        requiresReview
+          ? "border-amber-300 bg-amber-50 text-amber-800"
+          : "border-emerald-300 bg-emerald-50 text-emerald-800"
+      }`}
+    >
+      {requiresReview
+        ? "Review required"
+        : "No review flag"}
     </span>
   );
 }
@@ -108,7 +192,11 @@ function ReviewField({
           </p>
         </div>
 
-        <ReviewBadge requiresReview={requiresReview} />
+        <ReviewBadge
+          requiresReview={
+            requiresReview
+          }
+        />
       </div>
 
       <dl className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -117,7 +205,9 @@ function ReviewField({
             Confidence
           </dt>
           <dd className="mt-1 text-sm font-medium text-zinc-900">
-            {formatConfidence(confidence)}
+            {formatConfidence(
+              confidence,
+            )}
           </dd>
         </div>
 
@@ -126,7 +216,8 @@ function ReviewField({
             Source evidence
           </dt>
           <dd className="mt-1 text-sm leading-6 text-zinc-700">
-            {source ?? "No supporting source"}
+            {source ??
+              "No supporting source"}
           </dd>
         </div>
       </dl>
@@ -134,30 +225,106 @@ function ReviewField({
   );
 }
 
-function ExtractButton() {
-  const { pending } = useFormStatus();
+function ActionButton({
+  idleLabel,
+  pendingLabel,
+  secondary = false,
+}: {
+  readonly idleLabel: string;
+  readonly pendingLabel: string;
+  readonly secondary?: boolean;
+}) {
+  const {
+    pending,
+  } = useFormStatus();
 
   return (
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+      className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        secondary
+          ? "border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50"
+          : "bg-black text-white hover:bg-zinc-800"
+      }`}
     >
-      {pending ? "Extracting…" : "Run AI extraction"}
+      {pending
+        ? pendingLabel
+        : idleLabel}
     </button>
+  );
+}
+
+function DecisionBadge({
+  decision,
+}: {
+  readonly decision:
+    InquiryReviewDecisionResult;
+}) {
+  return (
+    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+        Human decision saved
+      </p>
+
+      <p className="mt-2 text-sm font-semibold text-emerald-950">
+        {decision.kind === "accepted"
+          ? "Accepted AI value"
+          : "Corrected value"}
+      </p>
+
+      <p className="mt-1 break-words text-sm text-emerald-900">
+        Resolved value:{" "}
+        {formatNullableValue(
+          decision.resolvedValue,
+        )}
+      </p>
+
+      <p className="mt-1 text-xs text-emerald-700">
+        Reviewed{" "}
+        {new Date(
+          decision.reviewedAt,
+        ).toLocaleString()}
+      </p>
+    </div>
   );
 }
 
 export function ExtractionPanel({
   inquiryId,
+  initialResult,
 }: ExtractionPanelProps) {
-  const [state, formAction] = useActionState(
-    extractInquiryAction,
-    initialExtractInquiryActionState,
+  const [
+    state,
+    formAction,
+  ] = useActionState(
+    inquiryReviewWorkflowAction,
+    createInitialInquiryReviewActionState(
+      initialResult,
+    ),
   );
 
-  const extraction = state.result?.extraction ?? null;
-  const reviewIssues = state.result?.reviewIssues ?? [];
+  const result = state.result;
+
+  const decisionsByField =
+    new Map(
+      result?.decisions.map(
+        (decision) => [
+          decision.field,
+          decision,
+        ],
+      ) ?? [],
+    );
+
+  const unresolvedCount =
+    result?.unresolvedReviewIssues.length ??
+    0;
+
+  const reviewCount =
+    result?.reviewIssues.length ?? 0;
+
+  const resolvedCount =
+    reviewCount - unresolvedCount;
 
   return (
     <section
@@ -174,27 +341,49 @@ export function ExtractionPanel({
             id="ai-extraction-heading"
             className="mt-3 text-2xl font-semibold tracking-tight text-zinc-950"
           >
-            Extract proposal requirements
+            Extract and review proposal requirements
           </h2>
 
           <p className="mt-3 text-sm leading-6 text-zinc-600">
-            The model interprets the customer inquiry. Evidence,
-            confidence and human-review status remain visible so
-            probabilistic output is not mistaken for business
-            authority.
+            AI interpretation is persisted as a snapshot.
+            Human decisions are stored separately and remain
+            visible after reload.
           </p>
         </div>
 
         <form action={formAction}>
           <input
             type="hidden"
+            name="operation"
+            value="extract"
+          />
+          <input
+            type="hidden"
             name="inquiryId"
             value={inquiryId}
           />
 
-          <ExtractButton />
+          <ActionButton
+            idleLabel={
+              result
+                ? "Re-run AI extraction"
+                : "Run AI extraction"
+            }
+            pendingLabel="Extracting…"
+          />
         </form>
       </div>
+
+      {result ? (
+        <p className="mt-4 text-xs leading-5 text-zinc-500">
+          Extraction snapshot saved{" "}
+          {new Date(
+            result.extractedAt,
+          ).toLocaleString()}.
+          Re-running extraction replaces this snapshot and
+          clears its previous human review decisions.
+        </p>
+      ) : null}
 
       {state.message ? (
         <div
@@ -202,16 +391,14 @@ export function ExtractionPanel({
           className={`mt-6 rounded-xl border px-4 py-3 text-sm leading-6 ${
             state.status === "error"
               ? "border-red-200 bg-red-50 text-red-800"
-              : state.status === "success"
-                ? "border-zinc-200 bg-zinc-50 text-zinc-700"
-                : "border-zinc-200 bg-zinc-50 text-zinc-700"
+              : "border-zinc-200 bg-zinc-50 text-zinc-700"
           }`}
         >
           {state.message}
         </div>
       ) : null}
 
-      {extraction ? (
+      {result ? (
         <div className="mt-8 space-y-8">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -221,16 +408,16 @@ export function ExtractionPanel({
 
               <span
                 className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${
-                  reviewIssues.length > 0
+                  unresolvedCount > 0
                     ? "border-amber-300 bg-amber-50 text-amber-800"
                     : "border-emerald-300 bg-emerald-50 text-emerald-800"
                 }`}
               >
-                {reviewIssues.length > 0
-                  ? `${reviewIssues.length} review flag${
-                      reviewIssues.length === 1 ? "" : "s"
-                    }`
-                  : "No review flags"}
+                {reviewCount === 0
+                  ? "No review flags"
+                  : unresolvedCount === 0
+                    ? `${resolvedCount} review flag${resolvedCount === 1 ? "" : "s"} resolved`
+                    : `${unresolvedCount} unresolved of ${reviewCount}`}
               </span>
             </div>
 
@@ -238,62 +425,80 @@ export function ExtractionPanel({
               <ReviewField
                 label="Guests"
                 value={formatNullableValue(
-                  extraction.guests.value,
+                  result.extraction.guests.value,
                 )}
-                confidence={extraction.guests.confidence}
-                source={extraction.guests.source}
+                confidence={
+                  result.extraction.guests.confidence
+                }
+                source={
+                  result.extraction.guests.source
+                }
                 requiresReview={
-                  extraction.guests.requiresReview
+                  result.extraction.guests.requiresReview
                 }
               />
 
               <ReviewField
                 label="Rooms"
                 value={formatNullableValue(
-                  extraction.rooms.value,
+                  result.extraction.rooms.value,
                 )}
-                confidence={extraction.rooms.confidence}
-                source={extraction.rooms.source}
+                confidence={
+                  result.extraction.rooms.confidence
+                }
+                source={
+                  result.extraction.rooms.source
+                }
                 requiresReview={
-                  extraction.rooms.requiresReview
+                  result.extraction.rooms.requiresReview
                 }
               />
 
               <ReviewField
                 label="Start date"
                 value={formatNullableValue(
-                  extraction.startDate.value,
+                  result.extraction.startDate.value,
                 )}
-                confidence={extraction.startDate.confidence}
-                source={extraction.startDate.source}
+                confidence={
+                  result.extraction.startDate.confidence
+                }
+                source={
+                  result.extraction.startDate.source
+                }
                 requiresReview={
-                  extraction.startDate.requiresReview
+                  result.extraction.startDate.requiresReview
                 }
               />
 
               <ReviewField
                 label="End date"
                 value={formatNullableValue(
-                  extraction.endDate.value,
+                  result.extraction.endDate.value,
                 )}
-                confidence={extraction.endDate.confidence}
-                source={extraction.endDate.source}
+                confidence={
+                  result.extraction.endDate.confidence
+                }
+                source={
+                  result.extraction.endDate.source
+                }
                 requiresReview={
-                  extraction.endDate.requiresReview
+                  result.extraction.endDate.requiresReview
                 }
               />
 
               <ReviewField
                 label="Budget (minor units)"
                 value={formatNullableValue(
-                  extraction.budgetCents.value,
+                  result.extraction.budgetCents.value,
                 )}
                 confidence={
-                  extraction.budgetCents.confidence
+                  result.extraction.budgetCents.confidence
                 }
-                source={extraction.budgetCents.source}
+                source={
+                  result.extraction.budgetCents.source
+                }
                 requiresReview={
-                  extraction.budgetCents.requiresReview
+                  result.extraction.budgetCents.requiresReview
                 }
               />
             </div>
@@ -304,16 +509,23 @@ export function ExtractionPanel({
               Requirements
             </h3>
 
-            {extraction.requirements.length > 0 ? (
+            {result.extraction.requirements.length > 0 ? (
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                {extraction.requirements.map(
-                  (requirement, index) => (
+                {result.extraction.requirements.map(
+                  (
+                    requirement,
+                    index,
+                  ) => (
                     <ReviewField
                       key={`${index}-${requirement.value}`}
                       label={`Requirement ${index + 1}`}
                       value={requirement.value}
-                      confidence={requirement.confidence}
-                      source={requirement.source}
+                      confidence={
+                        requirement.confidence
+                      }
+                      source={
+                        requirement.source
+                      }
                       requiresReview={
                         requirement.requiresReview
                       }
@@ -328,40 +540,231 @@ export function ExtractionPanel({
             )}
           </div>
 
-          {reviewIssues.length > 0 ? (
+          {reviewCount > 0 ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5">
-              <h3 className="font-semibold text-amber-950">
-                Human review queue
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold text-amber-950">
+                    Human review queue
+                  </h3>
 
-              <p className="mt-2 text-sm leading-6 text-amber-900">
-                These fields failed at least one deterministic
-                review rule. They must not be treated as approved
-                proposal data.
-              </p>
+                  <p className="mt-2 text-sm leading-6 text-amber-900">
+                    Human decisions resolve deterministic review
+                    flags. They do not approve, price, or send a
+                    proposal.
+                  </p>
+                </div>
+              </div>
 
-              <ul className="mt-4 space-y-3">
-                {reviewIssues.map((issue) => (
-                  <li
-                    key={formatReviewIssueField(issue.field)}
-                    className="rounded-xl border border-amber-200 bg-white/70 p-4"
-                  >
-                    <p className="text-sm font-semibold text-zinc-950">
-                      {formatReviewIssueField(issue.field)}
-                    </p>
+              <ul className="mt-5 space-y-5">
+                {result.reviewIssues.map(
+                  (issue) => {
+                    const decision =
+                      decisionsByField.get(
+                        issue.field,
+                      );
 
-                    <p className="mt-1 text-sm text-zinc-600">
-                      Confidence:{" "}
-                      {formatConfidence(issue.confidence)}
-                    </p>
+                    const candidate =
+                      getCandidateValue(
+                        result,
+                        issue.field,
+                      );
 
-                    <p className="mt-1 text-sm leading-6 text-zinc-700">
-                      Evidence:{" "}
-                      {issue.source ??
-                        "No supporting source"}
-                    </p>
-                  </li>
-                ))}
+                    const inputType =
+                      getCorrectionInputType(
+                        issue.field,
+                      );
+
+                    const numericMinimum =
+                      issue.field === "guests"
+                        ? 1
+                        : inputType === "number"
+                          ? 0
+                          : undefined;
+
+                    return (
+                      <li
+                        key={issue.field}
+                        className="rounded-2xl border border-amber-200 bg-white p-5"
+                      >
+                        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+                          <div>
+                            <p className="text-sm font-semibold text-zinc-950">
+                              {formatReviewIssueField(
+                                issue.field,
+                              )}
+                            </p>
+
+                            <p className="mt-2 text-sm text-zinc-600">
+                              AI candidate:{" "}
+                              <span className="font-medium text-zinc-900">
+                                {formatNullableValue(
+                                  candidate,
+                                )}
+                              </span>
+                            </p>
+
+                            <p className="mt-1 text-sm text-zinc-600">
+                              Confidence:{" "}
+                              {formatConfidence(
+                                issue.confidence,
+                              )}
+                            </p>
+
+                            <p className="mt-1 text-sm leading-6 text-zinc-700">
+                              Evidence:{" "}
+                              {issue.source ??
+                                "No supporting source"}
+                            </p>
+                          </div>
+
+                          <div className="space-y-4">
+                            {decision ? (
+                              <DecisionBadge
+                                decision={
+                                  decision
+                                }
+                              />
+                            ) : (
+                              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                <p className="text-sm font-semibold text-amber-950">
+                                  Unresolved
+                                </p>
+                                <p className="mt-1 text-sm text-amber-800">
+                                  A human decision is still required.
+                                </p>
+                              </div>
+                            )}
+
+                            {candidate !== null ? (
+                              <form
+                                action={
+                                  formAction
+                                }
+                              >
+                                <input
+                                  type="hidden"
+                                  name="operation"
+                                  value="review"
+                                />
+                                <input
+                                  type="hidden"
+                                  name="inquiryId"
+                                  value={
+                                    inquiryId
+                                  }
+                                />
+                                <input
+                                  type="hidden"
+                                  name="field"
+                                  value={
+                                    issue.field
+                                  }
+                                />
+                                <input
+                                  type="hidden"
+                                  name="kind"
+                                  value="accepted"
+                                />
+
+                                <ActionButton
+                                  idleLabel={
+                                    decision?.kind ===
+                                    "accepted"
+                                      ? "Re-accept AI value"
+                                      : "Accept AI value"
+                                  }
+                                  pendingLabel="Saving…"
+                                  secondary
+                                />
+                              </form>
+                            ) : null}
+
+                            <form
+                              action={
+                                formAction
+                              }
+                              className="space-y-3"
+                            >
+                              <input
+                                type="hidden"
+                                name="operation"
+                                value="review"
+                              />
+                              <input
+                                type="hidden"
+                                name="inquiryId"
+                                value={
+                                  inquiryId
+                                }
+                              />
+                              <input
+                                type="hidden"
+                                name="field"
+                                value={
+                                  issue.field
+                                }
+                              />
+                              <input
+                                type="hidden"
+                                name="kind"
+                                value="corrected"
+                              />
+
+                              <label className="block">
+                                <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                                  Corrected value
+                                </span>
+
+                                <input
+                                  name="correctedValue"
+                                  type={
+                                    inputType
+                                  }
+                                  min={
+                                    numericMinimum
+                                  }
+                                  step={
+                                    inputType ===
+                                    "number"
+                                      ? 1
+                                      : undefined
+                                  }
+                                  required
+                                  defaultValue={
+                                    decision?.kind ===
+                                    "corrected"
+                                      ? String(
+                                          decision.resolvedValue,
+                                        )
+                                      : ""
+                                  }
+                                  placeholder={
+                                    issue.field ===
+                                    "budgetCents"
+                                      ? "Minor units, e.g. 18000000"
+                                      : "Enter corrected value"
+                                  }
+                                  className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10"
+                                />
+                              </label>
+
+                              <ActionButton
+                                idleLabel={
+                                  decision?.kind ===
+                                  "corrected"
+                                    ? "Update correction"
+                                    : "Save correction"
+                                }
+                                pendingLabel="Saving…"
+                              />
+                            </form>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  },
+                )}
               </ul>
             </div>
           ) : (
@@ -371,22 +774,38 @@ export function ExtractionPanel({
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-emerald-900">
-                This means the extraction passed the current
-                evidence and confidence checks. It does not approve,
+                The extraction passed the current evidence and
+                confidence checks. This still does not approve,
                 price, or send a proposal.
               </p>
             </div>
           )}
+
+          {reviewCount > 0 &&
+          unresolvedCount === 0 ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+              <h3 className="font-semibold text-emerald-950">
+                Human review complete
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-emerald-900">
+                Every deterministic review flag now has a persisted
+                human decision. These reviewed values can become
+                input to a future deterministic pricing workflow.
+              </p>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="mt-8 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-6">
           <p className="text-sm font-medium text-zinc-800">
-            No extraction has been run in this page session.
+            No persisted extraction exists yet.
           </p>
 
           <p className="mt-2 text-sm leading-6 text-zinc-600">
-            Running extraction calls the configured AI provider once.
-            Reloading the page does not automatically call the model.
+            Run AI extraction once. The resulting snapshot and
+            subsequent human review decisions will persist across
+            page reloads.
           </p>
         </div>
       )}

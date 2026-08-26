@@ -9,3 +9,9 @@ export {
   reviewableFieldSchema,
   type ExtractedInquiryContract,
 } from "./inquiry";
+
+export {
+  reviewDecisionKindSchema,
+  saveInquiryReviewDecisionInputSchema,
+  type SaveInquiryReviewDecisionInputContract,
+} from "./review-decision";

@@ -31,14 +31,21 @@ approval, or final proposal state.
 | GitHub Actions CI | Implemented |
 | AI extraction in browser UI | Implemented |
 | Human review UI | Implemented |
+| Persist AI extraction snapshot | Implemented |
+| Persist human review decisions | Implemented |
 | Deterministic pricing engine | Planned |
 | Review-ready proposal draft | Planned |
 | MCP proposal tools | Planned |
 
 The persisted browser flow and guarded AI extraction flow are now composed on
 the inquiry detail page. AI extraction runs only when the user explicitly
-requests it, and deterministic review flags remain visible before downstream
-use.
+requests it. Extraction snapshots and human review decisions are persisted
+separately from the original inquiry, while deterministic review flags remain
+visible before downstream use.
+
+Re-running AI extraction replaces the previous extraction snapshot and clears
+its human review decisions. This prevents a decision made against one model
+output from silently carrying over to a different model output.
 
 ## What the system extracts
 
@@ -197,7 +204,9 @@ http://localhost:3000
 ```
 
 The current browser flow lets you create an inquiry, persist it in PostgreSQL,
-open its generated UUID route, and reload the persisted data.
+open its generated UUID route, explicitly run AI extraction, persist the
+resulting extraction snapshot, save human review decisions, and reload the same
+review state without another model call.
 
 ## Environment
 
@@ -291,10 +300,16 @@ persisted inquiry
 explicit AI extraction
       |
       v
+persisted extraction snapshot
+      |
+      v
 deterministic review issues
       |
       v
-human review UI
+persisted human review decisions
+      |
+      v
+reload-safe reviewed state
 ```
 
 Future deterministic capabilities may include:

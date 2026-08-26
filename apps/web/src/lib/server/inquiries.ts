@@ -1,24 +1,47 @@
 import "server-only";
 
-import { randomUUID } from "node:crypto";
+import {
+  randomUUID,
+} from "node:crypto";
 
-import { OpenAIInquiryExtractor } from "@proposal-agent/ai";
+import {
+  OpenAIInquiryExtractor,
+} from "@proposal-agent/ai";
 import {
   createInquiry,
-  extractInquiry,
+  extractInquiryReview,
   getInquiry,
+  getInquiryReview,
+  saveInquiryReviewDecision,
 } from "@proposal-agent/application";
-import { PostgresInquiryRepository } from "@proposal-agent/db";
-import { getReviewIssues } from "@proposal-agent/domain";
+import {
+  PostgresInquiryRepository,
+  PostgresInquiryReviewRepository,
+} from "@proposal-agent/db";
+import type {
+  InquiryReviewDecisionKind,
+} from "@proposal-agent/domain";
 
-import { getDatabasePool } from "./database";
+import {
+  getDatabasePool,
+} from "./database";
 
 function createInquiryRepository() {
-  return new PostgresInquiryRepository(getDatabasePool());
+  return new PostgresInquiryRepository(
+    getDatabasePool(),
+  );
 }
 
-function createInquiryExtractor(): OpenAIInquiryExtractor {
-  const apiKey = process.env.OPENAI_API_KEY;
+function createInquiryReviewRepository() {
+  return new PostgresInquiryReviewRepository(
+    getDatabasePool(),
+  );
+}
+
+function createInquiryExtractor():
+  OpenAIInquiryExtractor {
+  const apiKey =
+    process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     throw new Error(
@@ -26,7 +49,8 @@ function createInquiryExtractor(): OpenAIInquiryExtractor {
     );
   }
 
-  const model = process.env.OPENAI_MODEL;
+  const model =
+    process.env.OPENAI_MODEL;
 
   if (model) {
     return new OpenAIInquiryExtractor({
@@ -40,10 +64,13 @@ function createInquiryExtractor(): OpenAIInquiryExtractor {
   });
 }
 
-export async function createInquiryUseCase(rawText: string) {
+export async function createInquiryUseCase(
+  rawText: string,
+) {
   return createInquiry(
     {
-      repository: createInquiryRepository(),
+      repository:
+        createInquiryRepository(),
       generateId: randomUUID,
       now: () => new Date(),
     },
@@ -53,10 +80,13 @@ export async function createInquiryUseCase(rawText: string) {
   );
 }
 
-export async function getInquiryUseCase(id: string) {
+export async function getInquiryUseCase(
+  id: string,
+) {
   return getInquiry(
     {
-      repository: createInquiryRepository(),
+      repository:
+        createInquiryRepository(),
     },
     id,
   );
@@ -65,23 +95,49 @@ export async function getInquiryUseCase(id: string) {
 export async function extractPersistedInquiryUseCase(
   id: string,
 ) {
-  const inquiry = await getInquiryUseCase(id);
-
-  if (!inquiry) {
-    return null;
-  }
-
-  const extraction = await extractInquiry(
+  return extractInquiryReview(
     {
-      extractor: createInquiryExtractor(),
+      inquiryRepository:
+        createInquiryRepository(),
+      reviewRepository:
+        createInquiryReviewRepository(),
+      extractor:
+        createInquiryExtractor(),
+      now: () => new Date(),
     },
-    {
-      rawText: inquiry.rawText,
-    },
+    id,
   );
+}
 
-  return {
-    extraction,
-    reviewIssues: getReviewIssues(extraction),
-  };
+export async function getPersistedInquiryReviewUseCase(
+  id: string,
+) {
+  return getInquiryReview(
+    {
+      reviewRepository:
+        createInquiryReviewRepository(),
+    },
+    id,
+  );
+}
+
+export interface SavePersistedInquiryReviewDecisionInput {
+  readonly inquiryId: string;
+  readonly field: string;
+  readonly kind: InquiryReviewDecisionKind;
+  readonly correctedValue?: string;
+}
+
+export async function savePersistedInquiryReviewDecisionUseCase(
+  input:
+    SavePersistedInquiryReviewDecisionInput,
+) {
+  return saveInquiryReviewDecision(
+    {
+      reviewRepository:
+        createInquiryReviewRepository(),
+      now: () => new Date(),
+    },
+    input,
+  );
 }

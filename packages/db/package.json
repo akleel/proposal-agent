@@ -9,7 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "migrate": "tsx scripts/migrate.ts",
-    "test:integration": "vitest run tests/integration"
+    "test:integration": "vitest run tests/integration --no-file-parallelism"
   },
   "dependencies": {
     "@proposal-agent/application": "workspace:*",

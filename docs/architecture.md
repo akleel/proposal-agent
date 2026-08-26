@@ -456,9 +456,23 @@ created_at
 ```
 
 The raw inquiry remains the durable source from which extraction and review
-workflows can operate.
+workflows operate.
 
-The AI package has no direct database dependency.
+The review workflow now persists two additional concepts:
+
+- an extraction snapshot containing the deterministic `InquiryExtraction`;
+- human review decisions containing the reviewed field, decision kind, resolved
+  value, and review timestamp.
+
+The extraction snapshot is stored separately from the original customer text.
+Human decisions are stored separately from the extraction snapshot.
+
+Replacing an extraction snapshot also clears its previous human review
+decisions in the same persistence operation. A decision made against an older
+model output must never silently authorize a newer model output.
+
+The AI package has no direct database dependency. Persistence remains behind
+application-owned repository ports implemented by `packages/db`.
 
 ## 13. Migration strategy
 
@@ -593,17 +607,28 @@ the inquiry detail page.
 The flow is:
 
 create inquiry -> persist raw inquiry -> open inquiry detail -> explicit AI
-extraction -> deterministic review issues -> human review UI.
+extraction -> persist extraction snapshot -> deterministic review issues ->
+persist human review decisions -> reload-safe reviewed state.
 
 The model is not called on page load or reload. Extraction only happens after
 an explicit user action.
 
-The extraction result is intentionally transient at this stage. The original
-customer inquiry remains persisted, while the current extraction and review
-queue live in the page session.
+The extraction result is now persisted as a snapshot. Human review decisions
+are persisted separately and are restored on page reload without calling the
+model again.
 
-The next persistence boundary should capture reviewed extraction data and human
-review decisions before authoritative pricing or proposal drafting is added.
+A re-run of AI extraction replaces the stored snapshot and clears decisions
+that belonged to the previous snapshot. This prevents stale human decisions
+from being associated with newly generated model output.
+
+A missing human decision means the corresponding deterministic review issue
+remains unresolved. Persisting a decision resolves that review issue, but does
+not approve, price, send, or otherwise advance authoritative proposal state.
+
+The next boundary is to derive a resolved, reviewed inquiry that deterministic
+pricing and proposal-drafting workflows can consume without trusting raw AI
+output directly.
+
 ## 17. Future deterministic tools
 
 Future proposal capabilities may include:

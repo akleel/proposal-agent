@@ -1,14 +1,22 @@
-import { inquiryIdSchema } from "@proposal-agent/contracts";
+import {
+  inquiryIdSchema,
+} from "@proposal-agent/contracts";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import {
+  notFound,
+} from "next/navigation";
 
 import {
   getInquiryUseCase,
+  getPersistedInquiryReviewUseCase,
 } from "@/lib/server/inquiries";
 
 import {
   ExtractionPanel,
 } from "./extraction-panel";
+import {
+  serializeInquiryReview,
+} from "./types";
 
 interface InquiryPageProps {
   readonly params: Promise<{
@@ -16,20 +24,34 @@ interface InquiryPageProps {
   }>;
 }
 
-export const dynamic = "force-dynamic";
+export const dynamic =
+  "force-dynamic";
 
 export default async function InquiryPage({
   params,
 }: InquiryPageProps) {
-  const { id } = await params;
+  const {
+    id,
+  } = await params;
 
-  const parsedId = inquiryIdSchema.safeParse(id);
+  const parsedId =
+    inquiryIdSchema.safeParse(id);
 
   if (!parsedId.success) {
     notFound();
   }
 
-  const inquiry = await getInquiryUseCase(parsedId.data);
+  const [
+    inquiry,
+    review,
+  ] = await Promise.all([
+    getInquiryUseCase(
+      parsedId.data,
+    ),
+    getPersistedInquiryReviewUseCase(
+      parsedId.data,
+    ),
+  ]);
 
   if (!inquiry) {
     notFound();
@@ -67,7 +89,8 @@ export default async function InquiryPage({
 
               <p className="mt-3 text-sm leading-6 text-zinc-600">
                 The original customer text remains the durable
-                source. AI interpretation is shown separately below.
+                source. AI interpretation and human review are
+                persisted separately below.
               </p>
             </div>
 
@@ -104,7 +127,16 @@ export default async function InquiryPage({
             </div>
           </section>
 
-          <ExtractionPanel inquiryId={inquiry.id} />
+          <ExtractionPanel
+            inquiryId={inquiry.id}
+            initialResult={
+              review
+                ? serializeInquiryReview(
+                    review,
+                  )
+                : null
+            }
+          />
         </div>
       </div>
     </main>
