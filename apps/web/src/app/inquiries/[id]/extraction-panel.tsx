@@ -290,6 +290,124 @@ function DecisionBadge({
   );
 }
 
+function ResolvedInquiryPanel({
+  inquiry,
+}: {
+  readonly inquiry:
+    NonNullable<
+      InquiryExtractionResult["resolvedInquiry"]
+    >;
+}) {
+  return (
+    <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+        Deterministic downstream input
+      </p>
+
+      <h3 className="mt-2 text-lg font-semibold text-emerald-950">
+        Resolved inquiry ready
+      </h3>
+
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-emerald-900">
+        Application and domain code derived this state from the
+        persisted extraction snapshot and any required human
+        decisions. The AI model cannot write this downstream
+        input directly.
+      </p>
+
+      <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Guests
+          </dt>
+          <dd className="mt-1 font-medium text-emerald-950">
+            {formatNullableValue(
+              inquiry.guests,
+            )}
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Rooms
+          </dt>
+          <dd className="mt-1 font-medium text-emerald-950">
+            {formatNullableValue(
+              inquiry.rooms,
+            )}
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Budget
+          </dt>
+          <dd className="mt-1 font-medium text-emerald-950">
+            {formatNullableValue(
+              inquiry.budgetCents,
+            )}{" "}
+            minor units
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            Start date
+          </dt>
+          <dd className="mt-1 font-medium text-emerald-950">
+            {formatNullableValue(
+              inquiry.startDate,
+            )}
+          </dd>
+        </div>
+
+        <div>
+          <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+            End date
+          </dt>
+          <dd className="mt-1 font-medium text-emerald-950">
+            {formatNullableValue(
+              inquiry.endDate,
+            )}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-5">
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+          Resolved requirements
+        </h4>
+
+        {inquiry.requirements.length > 0 ? (
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-emerald-950">
+            {inquiry.requirements.map(
+              (
+                requirement,
+                index,
+              ) => (
+                <li
+                  key={`${index}-${requirement}`}
+                >
+                  {requirement}
+                </li>
+              ),
+            )}
+          </ul>
+        ) : (
+          <p className="mt-2 text-sm text-emerald-900">
+            No explicit requirements.
+          </p>
+        )}
+      </div>
+
+      <p className="mt-5 border-t border-emerald-200 pt-4 text-sm font-medium text-emerald-950">
+        Future deterministic pricing can consume this object
+        instead of raw AI output.
+      </p>
+    </section>
+  );
+}
+
 export function ExtractionPanel({
   inquiryId,
   initialResult,
@@ -781,19 +899,12 @@ export function ExtractionPanel({
             </div>
           )}
 
-          {reviewCount > 0 &&
-          unresolvedCount === 0 ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-              <h3 className="font-semibold text-emerald-950">
-                Human review complete
-              </h3>
-
-              <p className="mt-2 text-sm leading-6 text-emerald-900">
-                Every deterministic review flag now has a persisted
-                human decision. These reviewed values can become
-                input to a future deterministic pricing workflow.
-              </p>
-            </div>
+          {result.resolvedInquiry ? (
+            <ResolvedInquiryPanel
+              inquiry={
+                result.resolvedInquiry
+              }
+            />
           ) : null}
         </div>
       ) : (

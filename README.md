@@ -33,6 +33,7 @@ approval, or final proposal state.
 | Human review UI | Implemented |
 | Persist AI extraction snapshot | Implemented |
 | Persist human review decisions | Implemented |
+| Resolved reviewed inquiry boundary | Implemented |
 | Deterministic pricing engine | Planned |
 | Review-ready proposal draft | Planned |
 | MCP proposal tools | Planned |
@@ -46,6 +47,11 @@ visible before downstream use.
 Re-running AI extraction replaces the previous extraction snapshot and clears
 its human review decisions. This prevents a decision made against one model
 output from silently carrying over to a different model output.
+
+Once every deterministic review flag is resolved, domain code derives a
+`ResolvedInquiry`. This object is the trusted downstream boundary for future
+deterministic workflows. Pricing therefore does not need to consume raw AI
+output or interpret human review decisions itself.
 
 ## What the system extracts
 
@@ -310,6 +316,9 @@ persisted human review decisions
       |
       v
 reload-safe reviewed state
+      |
+      v
+deterministically resolved inquiry
 ```
 
 Future deterministic capabilities may include:

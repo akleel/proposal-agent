@@ -48,3 +48,8 @@ export type {
   InquiryReviewRepository,
   PersistedInquiryReview,
 } from "./inquiry-review-repository";
+export {
+  getResolvedInquiry,
+  type GetResolvedInquiryDependencies,
+  type GetResolvedInquiryResult,
+} from "./get-resolved-inquiry";

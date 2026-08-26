@@ -14,3 +14,8 @@ export {
   type InquiryReviewDecisionKind,
   type InquiryReviewResolvedValue,
 } from "./review-decision";
+export {
+  resolveReviewedInquiry,
+  InquiryResolutionError,
+  type ResolvedInquiry,
+} from "./resolved-inquiry";

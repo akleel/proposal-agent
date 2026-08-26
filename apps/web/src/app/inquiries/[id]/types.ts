@@ -4,12 +4,14 @@ import type {
 import type {
   InquiryExtraction,
   InquiryReviewDecisionKind,
+  ResolvedInquiry,
   ReviewIssue,
 } from "@proposal-agent/domain";
 
 export interface InquiryReviewDecisionResult {
   readonly field: string;
-  readonly kind: InquiryReviewDecisionKind;
+  readonly kind:
+    InquiryReviewDecisionKind;
   readonly resolvedValue:
     | string
     | number;
@@ -17,7 +19,8 @@ export interface InquiryReviewDecisionResult {
 }
 
 export interface InquiryExtractionResult {
-  readonly extraction: InquiryExtraction;
+  readonly extraction:
+    InquiryExtraction;
   readonly extractedAt: string;
   readonly reviewIssues:
     readonly ReviewIssue[];
@@ -25,6 +28,8 @@ export interface InquiryExtractionResult {
     readonly ReviewIssue[];
   readonly decisions:
     readonly InquiryReviewDecisionResult[];
+  readonly resolvedInquiry:
+    ResolvedInquiry | null;
 }
 
 export interface InquiryReviewActionState {
@@ -41,7 +46,8 @@ export function serializeInquiryReview(
   review: InquiryReviewState,
 ): InquiryExtractionResult {
   return {
-    extraction: review.extraction,
+    extraction:
+      review.extraction,
     extractedAt:
       review.extractedAt.toISOString(),
     reviewIssues:
@@ -51,14 +57,18 @@ export function serializeInquiryReview(
     decisions:
       review.decisions.map(
         (decision) => ({
-          field: decision.field,
-          kind: decision.kind,
+          field:
+            decision.field,
+          kind:
+            decision.kind,
           resolvedValue:
             decision.resolvedValue,
           reviewedAt:
             decision.reviewedAt.toISOString(),
         }),
       ),
+    resolvedInquiry:
+      review.resolvedInquiry,
   };
 }
 

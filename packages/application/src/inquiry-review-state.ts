@@ -1,5 +1,7 @@
 import {
   getReviewIssues,
+  resolveReviewedInquiry,
+  type ResolvedInquiry,
   type ReviewIssue,
 } from "@proposal-agent/domain";
 
@@ -9,9 +11,12 @@ import type {
 
 export interface InquiryReviewState
   extends PersistedInquiryReview {
-  readonly reviewIssues: readonly ReviewIssue[];
+  readonly reviewIssues:
+    readonly ReviewIssue[];
   readonly unresolvedReviewIssues:
     readonly ReviewIssue[];
+  readonly resolvedInquiry:
+    ResolvedInquiry | null;
 }
 
 export function toInquiryReviewState(
@@ -27,13 +32,22 @@ export function toInquiryReviewState(
       ),
     );
 
+  const unresolvedReviewIssues =
+    reviewIssues.filter(
+      (issue) =>
+        !resolvedFields.has(
+          issue.field,
+        ),
+    );
+
   return {
     ...review,
     reviewIssues,
-    unresolvedReviewIssues:
-      reviewIssues.filter(
-        (issue) =>
-          !resolvedFields.has(issue.field),
+    unresolvedReviewIssues,
+    resolvedInquiry:
+      resolveReviewedInquiry(
+        review.extraction,
+        review.decisions,
       ),
   };
 }

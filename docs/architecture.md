@@ -625,9 +625,31 @@ A missing human decision means the corresponding deterministic review issue
 remains unresolved. Persisting a decision resolves that review issue, but does
 not approve, price, send, or otherwise advance authoritative proposal state.
 
-The next boundary is to derive a resolved, reviewed inquiry that deterministic
-pricing and proposal-drafting workflows can consume without trusting raw AI
-output directly.
+Application and domain code now derive a `ResolvedInquiry` only when every
+deterministic review issue has a valid human decision. If any review issue
+remains unresolved, no resolved downstream input is available.
+
+Persisted human decisions are revalidated against the current extraction before
+they can contribute to the resolved object. Stale decisions, duplicate
+decisions, and accepted values that no longer match the extraction are rejected
+by deterministic domain code.
+
+`ResolvedInquiry` is derived state rather than another persisted source of
+truth. The durable inputs remain the extraction snapshot and its human review
+decisions.
+
+The application exposes the downstream boundary explicitly:
+
+not_extracted -> no extraction snapshot exists
+review_required -> deterministic review remains unresolved
+ready -> ResolvedInquiry
+
+A new AI extraction replaces the previous snapshot and clears its human
+decisions. This immediately removes the previously derived `ResolvedInquiry`
+until the new extraction satisfies the deterministic review boundary.
+
+The next slice can therefore build an authoritative catalog and deterministic
+pricing engine that accepts `ResolvedInquiry` instead of raw model output.
 
 ## 17. Future deterministic tools
 
