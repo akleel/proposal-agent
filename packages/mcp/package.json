@@ -8,15 +8,22 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start": "tsx src/stdio.ts",
+    "test:protocol": "vitest run tests/stdio-protocol.test.ts --no-file-parallelism"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
     "@proposal-agent/application": "workspace:*",
     "@proposal-agent/contracts": "workspace:*",
-    "@proposal-agent/domain": "workspace:*"
+    "@proposal-agent/db": "workspace:*",
+    "@proposal-agent/domain": "workspace:*",
+    "@proposal-agent/catalog": "workspace:*"
   },
   "devDependencies": {
-    "@proposal-agent/catalog": "workspace:*",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "^24.13.3",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   }

@@ -1,4 +1,8 @@
 export {
+  createProposalMcpServer,
+} from "./server";
+
+export {
   calculatePricingTool,
   createDraftTool,
   searchProductsTool,
