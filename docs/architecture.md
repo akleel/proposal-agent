@@ -14,7 +14,7 @@ lifecycle state.
 
 ## 2. Current system
 
-The project currently contains two working slices.
+The project now contains a composed proposal workflow spanning inquiry persistence, AI interpretation, human review, deterministic pricing, proposal drafts, and MCP.
 
 ### Persisted inquiry slice
 
@@ -608,7 +608,7 @@ The flow is:
 
 create inquiry -> persist raw inquiry -> open inquiry detail -> explicit AI
 extraction -> persist extraction snapshot -> deterministic review issues ->
-persist human review decisions -> reload-safe reviewed state.
+persist human review decisions -> ResolvedInquiry -> authoritative catalog -> deterministic pricing -> persisted proposal draft.
 
 The model is not called on page load or reload. Extraction only happens after
 an explicit user action.
@@ -648,26 +648,32 @@ A new AI extraction replaces the previous snapshot and clears its human
 decisions. This immediately removes the previously derived `ResolvedInquiry`
 until the new extraction satisfies the deterministic review boundary.
 
-The next slice can therefore build an authoritative catalog and deterministic
-pricing engine that accepts `ResolvedInquiry` instead of raw model output.
+The resolved boundary now feeds the authoritative catalog and deterministic pricing engine instead of exposing raw model output downstream.
 
-## 17. Future deterministic tools
+## 17. MCP proposal tools
 
-Future proposal capabilities may include:
+The implemented MCP proposal capabilities are:
 
 ```text
 search_products
-get_template
 calculate_pricing
 validate_proposal
 create_draft
 ```
 
-These are candidates for a future MCP boundary.
+These capabilities are exposed through the MCP v2 stdio boundary.
 
-The AI may request these capabilities.
+MCP clients may request these capabilities.
 
-The implementations remain deterministic.
+The implementations delegate to existing application and domain use cases.
+Pricing and proposal authority remain deterministic.
+
+The stdio protocol smoke test negotiates MCP `2026-07-28`, discovers the
+four tools, and verifies that caller-supplied authority such as
+`approved: true` is rejected at the input boundary.
+
+The MCP adapter contains no direct SQL and does not own pricing rules.
+
 
 For example:
 

@@ -34,9 +34,9 @@ approval, or final proposal state.
 | Persist AI extraction snapshot | Implemented |
 | Persist human review decisions | Implemented |
 | Resolved reviewed inquiry boundary | Implemented |
-| Deterministic pricing engine | Planned |
-| Review-ready proposal draft | Planned |
-| MCP proposal tools | Planned |
+| Deterministic pricing engine | Implemented |
+| Review-ready proposal draft | Implemented |
+| MCP proposal tools | Implemented |
 
 The persisted browser flow and guarded AI extraction flow are now composed on
 the inquiry detail page. AI extraction runs only when the user explicitly
@@ -52,6 +52,28 @@ Once every deterministic review flag is resolved, domain code derives a
 `ResolvedInquiry`. This object is the trusted downstream boundary for future
 deterministic workflows. Pricing therefore does not need to consume raw AI
 output or interpret human review decisions itself.
+
+## Deterministic proposal workflow
+
+After human review, downstream proposal generation follows a deterministic authority chain:
+
+ResolvedInquiry -> catalog selections -> authoritative catalog -> deterministic pricing -> persisted proposal draft
+
+The browser and MCP callers submit selections, not authoritative prices or totals.
+Historical drafts persist their catalog version and pricing snapshot, so they do not silently reprice.
+
+The lifecycle currently stops at draft: a draft is not approved and is not sent.
+
+### MCP proposal tools
+
+- search_products searches the authoritative catalog.
+- calculate_pricing runs deterministic pricing for a reviewed inquiry.
+- validate_proposal validates a persisted proposal snapshot.
+- create_draft recalculates authoritative pricing and persists draft state.
+
+The MCP layer is an adapter over application and domain behavior. It does not own SQL or pricing rules.
+
+A real subprocess protocol test negotiates MCP 2026-07-28 and verifies that authority escalation such as approved: true is rejected.
 
 ## What the system extracts
 
