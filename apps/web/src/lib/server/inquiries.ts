@@ -8,6 +8,7 @@ import {
   OpenAIInquiryExtractor,
 } from "@proposal-agent/ai";
 import {
+  calculateInquiryPricing,
   createInquiry,
   extractInquiryReview,
   getInquiry,
@@ -19,9 +20,13 @@ import {
   PostgresInquiryReviewRepository,
 } from "@proposal-agent/db";
 import type {
+  CatalogSelection,
   InquiryReviewDecisionKind,
 } from "@proposal-agent/domain";
 
+import {
+  StaticCatalogProvider,
+} from "./catalog";
 import {
   getDatabasePool,
 } from "./database";
@@ -36,6 +41,11 @@ function createInquiryReviewRepository() {
   return new PostgresInquiryReviewRepository(
     getDatabasePool(),
   );
+}
+
+function createCatalogProvider():
+  StaticCatalogProvider {
+  return new StaticCatalogProvider();
 }
 
 function createInquiryExtractor():
@@ -118,6 +128,30 @@ export async function getPersistedInquiryReviewUseCase(
         createInquiryReviewRepository(),
     },
     id,
+  );
+}
+
+export async function getCurrentPricingCatalogUseCase() {
+  return createCatalogProvider()
+    .getCurrentCatalog();
+}
+
+export async function calculatePersistedInquiryPricingUseCase(
+  inquiryId: string,
+  selections:
+    readonly CatalogSelection[],
+) {
+  return calculateInquiryPricing(
+    {
+      reviewRepository:
+        createInquiryReviewRepository(),
+      catalogProvider:
+        createCatalogProvider(),
+    },
+    {
+      inquiryId,
+      selections,
+    },
   );
 }
 

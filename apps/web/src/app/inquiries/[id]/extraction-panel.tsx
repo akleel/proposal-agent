@@ -30,6 +30,29 @@ interface ReviewFieldProps {
   readonly requiresReview: boolean;
 }
 
+function formatDisplayDateTime(
+  value: string,
+): string {
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
+    return value;
+  }
+
+  return (
+    date
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ") +
+    " UTC"
+  );
+}
+
 function formatConfidence(
   confidence: number,
 ): string {
@@ -282,9 +305,9 @@ function DecisionBadge({
 
       <p className="mt-1 text-xs text-emerald-700">
         Reviewed{" "}
-        {new Date(
+        {formatDisplayDateTime(
           decision.reviewedAt,
-        ).toLocaleString()}
+        )}
       </p>
     </div>
   );
@@ -401,7 +424,7 @@ function ResolvedInquiryPanel({
       </div>
 
       <p className="mt-5 border-t border-emerald-200 pt-4 text-sm font-medium text-emerald-950">
-        Future deterministic pricing can consume this object
+        Deterministic pricing below consumes this reviewed object
         instead of raw AI output.
       </p>
     </section>
@@ -495,9 +518,9 @@ export function ExtractionPanel({
       {result ? (
         <p className="mt-4 text-xs leading-5 text-zinc-500">
           Extraction snapshot saved{" "}
-          {new Date(
+          {formatDisplayDateTime(
             result.extractedAt,
-          ).toLocaleString()}.
+          )}.
           Re-running extraction replaces this snapshot and
           clears its previous human review decisions.
         </p>

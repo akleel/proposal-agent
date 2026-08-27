@@ -53,3 +53,14 @@ export {
   type GetResolvedInquiryDependencies,
   type GetResolvedInquiryResult,
 } from "./get-resolved-inquiry";
+export type {
+  CatalogProvider,
+  PricingCatalog,
+} from "./catalog-provider";
+
+export {
+  calculateInquiryPricing,
+  type CalculateInquiryPricingDependencies,
+  type CalculateInquiryPricingInput,
+  type CalculateInquiryPricingResult,
+} from "./calculate-inquiry-pricing";

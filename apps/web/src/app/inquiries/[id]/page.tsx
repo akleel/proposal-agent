@@ -7,6 +7,7 @@ import {
 } from "next/navigation";
 
 import {
+  getCurrentPricingCatalogUseCase,
   getInquiryUseCase,
   getPersistedInquiryReviewUseCase,
 } from "@/lib/server/inquiries";
@@ -14,6 +15,9 @@ import {
 import {
   ExtractionPanel,
 } from "./extraction-panel";
+import {
+  PricingPanel,
+} from "./pricing-panel";
 import {
   serializeInquiryReview,
 } from "./types";
@@ -44,6 +48,7 @@ export default async function InquiryPage({
   const [
     inquiry,
     review,
+    catalog,
   ] = await Promise.all([
     getInquiryUseCase(
       parsedId.data,
@@ -51,11 +56,23 @@ export default async function InquiryPage({
     getPersistedInquiryReviewUseCase(
       parsedId.data,
     ),
+    getCurrentPricingCatalogUseCase(),
   ]);
 
   if (!inquiry) {
     notFound();
   }
+
+  const pricingContextKey =
+    review
+      ? [
+          review.extractedAt.toISOString(),
+          ...review.decisions.map(
+            (decision) =>
+              `${decision.field}:${decision.reviewedAt.toISOString()}`,
+          ),
+        ].join("|")
+      : "not-extracted";
 
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16">
@@ -135,6 +152,16 @@ export default async function InquiryPage({
                     review,
                   )
                 : null
+            }
+          />
+
+          <PricingPanel
+            key={pricingContextKey}
+            inquiryId={inquiry.id}
+            catalog={catalog}
+            resolvedInquiry={
+              review?.resolvedInquiry ??
+              null
             }
           />
         </div>
