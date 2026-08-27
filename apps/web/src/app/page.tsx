@@ -43,7 +43,7 @@ export default function Home() {
               02 · Review
             </p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Structured extraction will surface uncertainty and
+              Structured extraction surfaces uncertainty and
               provenance.
             </p>
           </div>
@@ -53,7 +53,7 @@ export default function Home() {
               03 · Proposal
             </p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Deterministic pricing and preflight remain under
+              Deterministic pricing and proposal drafting remain under
               application control.
             </p>
           </div>

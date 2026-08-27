@@ -1,6 +1,10 @@
 "use server";
 
 import {
+  consumeDemoWriteRateLimit,
+} from "@/lib/server/demo-rate-limit";
+
+import {
   calculateInquiryPricingInputSchema,
 } from "@proposal-agent/contracts";
 import {
@@ -80,6 +84,15 @@ export async function createProposalDraftAction(
   let draftId: string;
 
   try {
+    const rateLimit =
+      await consumeDemoWriteRateLimit();
+
+    if (!rateLimit.allowed) {
+      return errorState(
+        "The public demo write limit has been reached. Please try again later.",
+      );
+    }
+
     const result =
       await createPersistedProposalDraftUseCase(
         parsed.data.inquiryId,

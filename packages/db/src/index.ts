@@ -11,3 +11,9 @@ export {
 export {
   PostgresProposalDraftRepository,
 } from "./repositories/postgres-proposal-draft-repository";
+
+export {
+  PostgresRateLimitRepository,
+  type RateLimitDecision,
+  type RateLimitRule,
+} from "./repositories/postgres-rate-limit-repository";

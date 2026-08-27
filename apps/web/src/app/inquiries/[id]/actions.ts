@@ -1,6 +1,10 @@
 "use server";
 
 import {
+  consumeDemoAiRateLimit,
+} from "@/lib/server/demo-rate-limit";
+
+import {
   calculateInquiryPricingInputSchema,
   inquiryIdSchema,
   saveInquiryReviewDecisionInputSchema,
@@ -16,6 +20,7 @@ import {
 import {
   calculatePersistedInquiryPricingUseCase,
   extractPersistedInquiryUseCase,
+  getInquiryUseCase,
   savePersistedInquiryReviewDecisionUseCase,
 } from "@/lib/server/inquiries";
 
@@ -103,6 +108,28 @@ export async function inquiryReviewWorkflowAction(
 
   if (operation === "extract") {
     try {
+      const inquiry =
+        await getInquiryUseCase(
+          parsedId.data,
+        );
+
+      if (!inquiry) {
+        return errorState(
+          "The inquiry could not be found.",
+          previousState.result,
+        );
+      }
+
+      const rateLimit =
+        await consumeDemoAiRateLimit();
+
+      if (!rateLimit.allowed) {
+        return errorState(
+          "The public demo AI usage limit has been reached. Please try again later.",
+          previousState.result,
+        );
+      }
+
       const review =
         await extractPersistedInquiryUseCase(
           parsedId.data,
