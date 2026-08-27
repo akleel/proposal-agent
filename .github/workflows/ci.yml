@@ -70,6 +70,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Browser E2E tests
+        env:
+          DEMO_RATE_LIMIT_SECRET: ci-only-demo-rate-limit-secret-for-e2e
         run: pnpm test:e2e
 
       - name: Upload Playwright report
