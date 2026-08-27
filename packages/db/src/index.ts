@@ -7,3 +7,7 @@ export {
 export {
   PostgresInquiryReviewRepository,
 } from "./repositories/postgres-inquiry-review-repository";
+
+export {
+  PostgresProposalDraftRepository,
+} from "./repositories/postgres-proposal-draft-repository";
