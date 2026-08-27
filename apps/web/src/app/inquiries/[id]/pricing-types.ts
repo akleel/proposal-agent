@@ -1,4 +1,5 @@
 import type {
+  CatalogSelection,
   PricingResult,
 } from "@proposal-agent/domain";
 
@@ -10,6 +11,8 @@ export interface PricingActionState {
   readonly message: string;
   readonly pricing:
     PricingResult | null;
+  readonly selections:
+    readonly CatalogSelection[] | null;
 }
 
 export const initialPricingActionState:
@@ -17,4 +20,5 @@ export const initialPricingActionState:
     status: "idle",
     message: "",
     pricing: null,
+    selections: null,
   };

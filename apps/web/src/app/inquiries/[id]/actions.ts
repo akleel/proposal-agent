@@ -41,13 +41,12 @@ function errorState(
 
 function pricingErrorState(
   message: string,
-  pricing:
-    PricingActionState["pricing"] = null,
 ): PricingActionState {
   return {
     status: "error",
     message,
-    pricing,
+    pricing: null,
+    selections: null,
   };
 }
 
@@ -278,6 +277,8 @@ export async function calculateInquiryPricingAction(
         `Pricing calculated deterministically from catalog ${result.pricing.catalogVersion}.`,
       pricing:
         result.pricing,
+      selections:
+        parsed.data.selections,
     };
   } catch (error) {
     if (error instanceof PricingError) {

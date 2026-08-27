@@ -328,7 +328,7 @@ test(
       ) {
         await page
           .locator(
-            `input[name="catalogItemId"][value="${catalogItemId}"]`,
+            `input[type="checkbox"][name="catalogItemId"][value="${catalogItemId}"]`,
           )
           .check();
       }
@@ -445,7 +445,7 @@ test(
       ) {
         await page
           .locator(
-            `input[name="catalogItemId"][value="${catalogItemId}"]`,
+            `input[type="checkbox"][name="catalogItemId"][value="${catalogItemId}"]`,
           )
           .uncheck();
       }

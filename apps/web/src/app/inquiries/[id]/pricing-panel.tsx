@@ -4,6 +4,7 @@ import type {
   PricingCatalog,
 } from "@proposal-agent/application";
 import type {
+  CatalogSelection,
   PricingBasis,
   PricingResult,
   ResolvedInquiry,
@@ -18,6 +19,9 @@ import {
 import {
   calculateInquiryPricingAction,
 } from "./actions";
+import {
+  CreateProposalDraftForm,
+} from "./proposal-draft-form";
 import {
   initialPricingActionState,
 } from "./pricing-types";
@@ -301,10 +305,15 @@ function BudgetSummary({
 }
 
 function PricingResultView({
+  inquiryId,
   pricing,
+  selections,
 }: {
+  readonly inquiryId: string;
   readonly pricing:
     PricingResult;
+  readonly selections:
+    readonly CatalogSelection[];
 }) {
   return (
     <section
@@ -440,6 +449,11 @@ function PricingResultView({
         code from the reviewed inquiry and
         authoritative server-side catalog.
       </p>
+
+      <CreateProposalDraftForm
+        inquiryId={inquiryId}
+        selections={selections}
+      />
     </section>
   );
 }
@@ -645,9 +659,14 @@ export function PricingPanel({
         </div>
       ) : null}
 
-      {state.pricing ? (
+      {state.pricing &&
+      state.selections ? (
         <PricingResultView
+          inquiryId={inquiryId}
           pricing={state.pricing}
+          selections={
+            state.selections
+          }
         />
       ) : null}
     </section>
