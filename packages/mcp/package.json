@@ -1,0 +1,23 @@
+{
+  "name": "@proposal-agent/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@proposal-agent/application": "workspace:*",
+    "@proposal-agent/contracts": "workspace:*",
+    "@proposal-agent/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@proposal-agent/catalog": "workspace:*",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

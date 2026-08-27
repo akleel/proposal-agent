@@ -26,3 +26,14 @@ export {
   proposalDraftIdSchema,
   type ProposalDraftIdContract,
 } from "./proposal-draft";
+
+export {
+  mcpCalculatePricingInputSchema,
+  mcpCreateDraftInputSchema,
+  mcpSearchProductsInputSchema,
+  mcpValidateProposalInputSchema,
+  type McpCalculatePricingInputContract,
+  type McpCreateDraftInputContract,
+  type McpSearchProductsInputContract,
+  type McpValidateProposalInputContract,
+} from "./mcp-tools";

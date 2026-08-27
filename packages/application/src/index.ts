@@ -80,3 +80,17 @@ export {
   getProposalDraft,
   type GetProposalDraftDependencies,
 } from "./get-proposal-draft";
+
+export {
+  CatalogSearchError,
+  searchCatalogProducts,
+  type SearchCatalogProductsDependencies,
+  type SearchCatalogProductsInput,
+  type SearchCatalogProductsResult,
+} from "./search-catalog-products";
+
+export {
+  validateProposalDraft,
+  type ValidateProposalDraftDependencies,
+  type ValidateProposalDraftResult,
+} from "./validate-proposal-draft";

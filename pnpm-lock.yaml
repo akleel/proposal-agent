@@ -20,6 +20,9 @@ importers:
       '@proposal-agent/application':
         specifier: workspace:*
         version: link:../../packages/application
+      '@proposal-agent/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
       '@proposal-agent/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
@@ -108,6 +111,22 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@20.19.43)(vite@7.3.6(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
 
+  packages/catalog:
+    dependencies:
+      '@proposal-agent/application':
+        specifier: workspace:*
+        version: link:../application
+      '@proposal-agent/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@20.19.43)(vite@7.3.6(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
+
   packages/contracts:
     dependencies:
       zod:
@@ -160,6 +179,28 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.7(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(supports-color@7.2.0)(tsx@4.23.12)
+
+  packages/mcp:
+    dependencies:
+      '@proposal-agent/application':
+        specifier: workspace:*
+        version: link:../application
+      '@proposal-agent/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@proposal-agent/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      '@proposal-agent/catalog':
+        specifier: workspace:*
+        version: link:../catalog
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^4.1.11
+        version: 4.1.11(@types/node@20.19.43)(vite@7.3.6(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12))
 
 packages:
 

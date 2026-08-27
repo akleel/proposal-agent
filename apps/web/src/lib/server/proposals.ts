@@ -18,7 +18,7 @@ import type {
 
 import {
   StaticCatalogProvider,
-} from "./catalog";
+} from "@proposal-agent/catalog";
 import {
   getDatabasePool,
 } from "./database";
