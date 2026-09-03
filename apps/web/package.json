@@ -1,35 +1,36 @@
 {
-    "name": "@proposal-agent/web",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "eslint",
-        "typecheck": "next typegen && tsc --noEmit"
-    },
-    "dependencies": {
-        "@proposal-agent/ai": "workspace:*",
-        "@proposal-agent/application": "workspace:*",
-        "@proposal-agent/catalog": "workspace:*",
-        "@proposal-agent/contracts": "workspace:*",
-        "@proposal-agent/db": "workspace:*",
-        "@proposal-agent/domain": "workspace:*",
-        "next": "16.3.1",
-        "react": "19.2.8",
-        "react-dom": "19.2.8",
-        "server-only": "^0.0.1"
-    },
-    "devDependencies": {
-        "@tailwindcss/postcss": "^4",
-        "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
-        "eslint": "^9",
-        "eslint-config-next": "16.3.1",
-        "tailwindcss": "^4",
-        "typescript": "^5"
-    },
-    "packageManager": "pnpm@11.22.0"
+  "name": "@proposal-agent/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "eslint",
+    "clean:generated": "node -e \"require(\u0027node:fs\u0027).rmSync(\u0027.next\u0027, { recursive: true, force: true })\"",
+    "typecheck": "pnpm clean:generated \u0026\u0026 next typegen \u0026\u0026 tsc --noEmit",
+    "build": "pnpm clean:generated \u0026\u0026 next build"
+  },
+  "dependencies": {
+    "@proposal-agent/ai": "workspace:*",
+    "@proposal-agent/application": "workspace:*",
+    "@proposal-agent/catalog": "workspace:*",
+    "@proposal-agent/contracts": "workspace:*",
+    "@proposal-agent/db": "workspace:*",
+    "@proposal-agent/domain": "workspace:*",
+    "next": "16.3.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@11.22.0"
 }

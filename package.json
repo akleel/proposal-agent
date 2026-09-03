@@ -1,23 +1,32 @@
 {
-    "name":  "proposal-agent",
-    "version":  "0.1.0",
-    "private":  true,
-    "packageManager":  "pnpm@11.22.0",
-    "scripts":  {
-                    "dev":  "pnpm --filter @proposal-agent/web dev",
-                    "build":  "pnpm --filter @proposal-agent/web build",
-                    "lint":  "pnpm --filter @proposal-agent/web lint",
-                    "typecheck":  "pnpm -r --if-present typecheck",
-                    "test":  "pnpm -r --if-present test",
-                    "db:up":  "docker compose up -d postgres",
-                    "db:down":  "docker compose down",
-                    "db:migrate":  "pnpm --filter @proposal-agent/db migrate",
-                    "test:integration":  "pnpm --filter @proposal-agent/db test:integration",
-                    "check":  "pnpm lint \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test \u0026\u0026 pnpm test:integration \u0026\u0026 pnpm build",
-                    "test:e2e":  "playwright test",
-                    "test:e2e:headed":  "playwright test --headed"
-                },
-    "devDependencies":  {
-                            "@playwright/test":  "^1.62.1"
-                        }
+  "name": "proposal-agent",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "dev": "pnpm --filter @proposal-agent/web dev",
+    "build": "pnpm --filter @proposal-agent/web build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @proposal-agent/db migrate",
+    "test:integration": "pnpm --filter @proposal-agent/db test:integration",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "lint:packages": "eslint \"packages/**/*.ts\"",
+    "lint:web": "pnpm --filter @proposal-agent/web lint",
+    "lint": "pnpm lint:packages \u0026\u0026 pnpm lint:web",
+    "lint:fix": "eslint \"packages/**/*.ts\" --fix \u0026\u0026 pnpm --filter @proposal-agent/web exec eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm format:check \u0026\u0026 pnpm lint \u0026\u0026 pnpm typecheck \u0026\u0026 pnpm test \u0026\u0026 pnpm build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "eslint": "9.39.5",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.68.0"
+  }
 }
