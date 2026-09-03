@@ -12,9 +12,7 @@ function requireDatabaseUrl(): string {
   const databaseUrl = process.env.DATABASE_URL;
 
   if (!databaseUrl) {
-    throw new Error(
-      "Missing DATABASE_URL. Configure it in apps/web/.env.local.",
-    );
+    throw new Error("Missing DATABASE_URL. Configure it in apps/web/.env.local.");
   }
 
   return databaseUrl;

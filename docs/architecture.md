@@ -674,7 +674,6 @@ four tools, and verifies that caller-supplied authority such as
 
 The MCP adapter contains no direct SQL and does not own pricing rules.
 
-
 For example:
 
 ```text

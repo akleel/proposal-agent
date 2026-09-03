@@ -26,12 +26,8 @@ export interface ReviewIssue {
   readonly confidence: number;
 }
 
-export function getReviewIssues(
-  extraction: InquiryExtraction,
-): readonly ReviewIssue[] {
-  const fields: ReadonlyArray<
-    readonly [string, ReviewableField<unknown>]
-  > = [
+export function getReviewIssues(extraction: InquiryExtraction): readonly ReviewIssue[] {
+  const fields: ReadonlyArray<readonly [string, ReviewableField<unknown>]> = [
     ["guests", extraction.guests],
     ["rooms", extraction.rooms],
     ["startDate", extraction.startDate],

@@ -1,18 +1,9 @@
-import {
-  isoDateToUtcDay,
-} from "./iso-date";
-import type {
-  ResolvedInquiry,
-} from "./resolved-inquiry";
+import { isoDateToUtcDay } from "./iso-date";
+import type { ResolvedInquiry } from "./resolved-inquiry";
 
 export type Currency = "SEK";
 
-export type PricingBasis =
-  | "per_person"
-  | "per_room"
-  | "per_room_night"
-  | "per_day"
-  | "flat";
+export type PricingBasis = "per_person" | "per_room" | "per_room_night" | "per_day" | "flat";
 
 export interface CatalogItem {
   readonly id: string;
@@ -83,35 +74,25 @@ export class PricingError extends Error {
   }
 }
 
-const pricingBases =
-  new Set<string>([
-    "per_person",
-    "per_room",
-    "per_room_night",
-    "per_day",
-    "flat",
-  ]);
+const pricingBases = new Set<string>([
+  "per_person",
+  "per_room",
+  "per_room_night",
+  "per_day",
+  "flat",
+]);
 
 function assertSafeNonNegativeInteger(
   value: number,
   code: PricingErrorCode,
   message: string,
 ): void {
-  if (
-    !Number.isSafeInteger(value) ||
-    value < 0
-  ) {
-    throw new PricingError(
-      code,
-      message,
-    );
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new PricingError(code, message);
   }
 }
 
-function safeMultiply(
-  left: number,
-  right: number,
-): number {
+function safeMultiply(left: number, right: number): number {
   const result = left * right;
 
   if (!Number.isSafeInteger(result)) {
@@ -124,40 +105,27 @@ function safeMultiply(
   return result;
 }
 
-function safeAdd(
-  left: number,
-  right: number,
-): number {
+function safeAdd(left: number, right: number): number {
   const result = left + right;
 
   if (!Number.isSafeInteger(result)) {
-    throw new PricingError(
-      "ARITHMETIC_OVERFLOW",
-      "Pricing total exceeded the safe integer range.",
-    );
+    throw new PricingError("ARITHMETIC_OVERFLOW", "Pricing total exceeded the safe integer range.");
   }
 
   return result;
 }
 
-function parseIsoDateToUtcDay(
-  value: string,
-): number {
+function parseIsoDateToUtcDay(value: string): number {
   const day = isoDateToUtcDay(value);
 
   if (day === null) {
-    throw new PricingError(
-      "INVALID_DATE_RANGE",
-      `Invalid ISO calendar date: ${value}.`,
-    );
+    throw new PricingError("INVALID_DATE_RANGE", `Invalid ISO calendar date: ${value}.`);
   }
 
   return day;
 }
 
-function calculateNights(
-  inquiry: ResolvedInquiry,
-): number {
+function calculateNights(inquiry: ResolvedInquiry): number {
   if (inquiry.startDate === null) {
     throw new PricingError(
       "MISSING_START_DATE",
@@ -166,38 +134,23 @@ function calculateNights(
   }
 
   if (inquiry.endDate === null) {
-    throw new PricingError(
-      "MISSING_END_DATE",
-      "An end date is required for room-night pricing.",
-    );
+    throw new PricingError("MISSING_END_DATE", "An end date is required for room-night pricing.");
   }
 
-  const startDay =
-    parseIsoDateToUtcDay(
-      inquiry.startDate,
-    );
+  const startDay = parseIsoDateToUtcDay(inquiry.startDate);
 
-  const endDay =
-    parseIsoDateToUtcDay(
-      inquiry.endDate,
-    );
+  const endDay = parseIsoDateToUtcDay(inquiry.endDate);
 
-  const nights =
-    endDay - startDay;
+  const nights = endDay - startDay;
 
   if (nights <= 0) {
-    throw new PricingError(
-      "INVALID_DATE_RANGE",
-      "End date must be after start date.",
-    );
+    throw new PricingError("INVALID_DATE_RANGE", "End date must be after start date.");
   }
 
   return nights;
 }
 
-function requireGuests(
-  inquiry: ResolvedInquiry,
-): number {
+function requireGuests(inquiry: ResolvedInquiry): number {
   if (inquiry.guests === null) {
     throw new PricingError(
       "MISSING_GUEST_COUNT",
@@ -205,41 +158,20 @@ function requireGuests(
     );
   }
 
-  if (
-    !Number.isSafeInteger(
-      inquiry.guests,
-    ) ||
-    inquiry.guests <= 0
-  ) {
-    throw new PricingError(
-      "INVALID_GUEST_COUNT",
-      "Guest count must be a positive safe integer.",
-    );
+  if (!Number.isSafeInteger(inquiry.guests) || inquiry.guests <= 0) {
+    throw new PricingError("INVALID_GUEST_COUNT", "Guest count must be a positive safe integer.");
   }
 
   return inquiry.guests;
 }
 
-function requireRooms(
-  inquiry: ResolvedInquiry,
-): number {
+function requireRooms(inquiry: ResolvedInquiry): number {
   if (inquiry.rooms === null) {
-    throw new PricingError(
-      "MISSING_ROOM_COUNT",
-      "Room count is required for room-based pricing.",
-    );
+    throw new PricingError("MISSING_ROOM_COUNT", "Room count is required for room-based pricing.");
   }
 
-  if (
-    !Number.isSafeInteger(
-      inquiry.rooms,
-    ) ||
-    inquiry.rooms <= 0
-  ) {
-    throw new PricingError(
-      "INVALID_ROOM_COUNT",
-      "Room count must be a positive safe integer.",
-    );
+  if (!Number.isSafeInteger(inquiry.rooms) || inquiry.rooms <= 0) {
+    throw new PricingError("INVALID_ROOM_COUNT", "Room count must be a positive safe integer.");
   }
 
   return inquiry.rooms;
@@ -252,23 +184,14 @@ function calculateQuantity(
 ): number {
   switch (item.pricingBasis) {
     case "per_person":
-      return safeMultiply(
-        requireGuests(inquiry),
-        occurrences,
-      );
+      return safeMultiply(requireGuests(inquiry), occurrences);
 
     case "per_room":
-      return safeMultiply(
-        requireRooms(inquiry),
-        occurrences,
-      );
+      return safeMultiply(requireRooms(inquiry), occurrences);
 
     case "per_room_night":
       return safeMultiply(
-        safeMultiply(
-          requireRooms(inquiry),
-          calculateNights(inquiry),
-        ),
+        safeMultiply(requireRooms(inquiry), calculateNights(inquiry)),
         occurrences,
       );
 
@@ -282,25 +205,15 @@ function validateCatalog(
   catalogVersion: string,
   catalog: readonly CatalogItem[],
 ): ReadonlyMap<string, CatalogItem> {
-  if (
-    typeof catalogVersion !== "string" ||
-    catalogVersion.trim().length === 0
-  ) {
-    throw new PricingError(
-      "INVALID_CATALOG_VERSION",
-      "Catalog version must not be blank.",
-    );
+  if (typeof catalogVersion !== "string" || catalogVersion.trim().length === 0) {
+    throw new PricingError("INVALID_CATALOG_VERSION", "Catalog version must not be blank.");
   }
 
   if (catalog.length === 0) {
-    throw new PricingError(
-      "INVALID_CATALOG",
-      "Pricing catalog must not be empty.",
-    );
+    throw new PricingError("INVALID_CATALOG", "Pricing catalog must not be empty.");
   }
 
-  const items =
-    new Map<string, CatalogItem>();
+  const items = new Map<string, CatalogItem>();
 
   for (const item of catalog) {
     if (
@@ -309,15 +222,10 @@ function validateCatalog(
       typeof item.name !== "string" ||
       item.name.trim().length === 0 ||
       item.currency !== "SEK" ||
-      !pricingBases.has(
-        item.pricingBasis,
-      ) ||
+      !pricingBases.has(item.pricingBasis) ||
       typeof item.active !== "boolean"
     ) {
-      throw new PricingError(
-        "INVALID_CATALOG",
-        "Catalog contains an invalid item.",
-      );
+      throw new PricingError("INVALID_CATALOG", "Catalog contains an invalid item.");
     }
 
     assertSafeNonNegativeInteger(
@@ -327,24 +235,16 @@ function validateCatalog(
     );
 
     if (items.has(item.id)) {
-      throw new PricingError(
-        "DUPLICATE_CATALOG_ITEM",
-        `Duplicate catalog item: ${item.id}.`,
-      );
+      throw new PricingError("DUPLICATE_CATALOG_ITEM", `Duplicate catalog item: ${item.id}.`);
     }
 
-    items.set(
-      item.id,
-      item,
-    );
+    items.set(item.id, item);
   }
 
   return items;
 }
 
-function validateBudget(
-  budget: number | null,
-): void {
+function validateBudget(budget: number | null): void {
   if (budget === null) {
     return;
   }
@@ -356,66 +256,35 @@ function validateBudget(
   );
 }
 
-export function calculatePricing(
-  input: CalculatePricingInput,
-): PricingResult {
-  const catalogItems =
-    validateCatalog(
-      input.catalogVersion,
-      input.catalog,
-    );
+export function calculatePricing(input: CalculatePricingInput): PricingResult {
+  const catalogItems = validateCatalog(input.catalogVersion, input.catalog);
 
-  validateBudget(
-    input.inquiry.budgetCents,
-  );
+  validateBudget(input.inquiry.budgetCents);
 
   if (input.selections.length === 0) {
-    throw new PricingError(
-      "EMPTY_SELECTIONS",
-      "At least one catalog item must be selected.",
-    );
+    throw new PricingError("EMPTY_SELECTIONS", "At least one catalog item must be selected.");
   }
 
-  const selectedIds =
-    new Set<string>();
+  const selectedIds = new Set<string>();
 
   const lines: PricingLine[] = [];
   let totalMinor = 0;
 
-  for (
-    const selection of input.selections
-  ) {
-    if (
-      !Number.isSafeInteger(
-        selection.occurrences,
-      ) ||
-      selection.occurrences <= 0
-    ) {
-      throw new PricingError(
-        "INVALID_OCCURRENCES",
-        "Occurrences must be a positive safe integer.",
-      );
+  for (const selection of input.selections) {
+    if (!Number.isSafeInteger(selection.occurrences) || selection.occurrences <= 0) {
+      throw new PricingError("INVALID_OCCURRENCES", "Occurrences must be a positive safe integer.");
     }
 
-    if (
-      selectedIds.has(
-        selection.catalogItemId,
-      )
-    ) {
+    if (selectedIds.has(selection.catalogItemId)) {
       throw new PricingError(
         "DUPLICATE_SELECTION",
         `Duplicate selection: ${selection.catalogItemId}.`,
       );
     }
 
-    selectedIds.add(
-      selection.catalogItemId,
-    );
+    selectedIds.add(selection.catalogItemId);
 
-    const item =
-      catalogItems.get(
-        selection.catalogItemId,
-      );
+    const item = catalogItems.get(selection.catalogItemId);
 
     if (!item) {
       throw new PricingError(
@@ -425,61 +294,33 @@ export function calculatePricing(
     }
 
     if (!item.active) {
-      throw new PricingError(
-        "INACTIVE_CATALOG_ITEM",
-        `Catalog item is inactive: ${item.id}.`,
-      );
+      throw new PricingError("INACTIVE_CATALOG_ITEM", `Catalog item is inactive: ${item.id}.`);
     }
 
+    const quantity = calculateQuantity(input.inquiry, item, selection.occurrences);
 
-    const quantity =
-      calculateQuantity(
-        input.inquiry,
-        item,
-        selection.occurrences,
-      );
+    const lineTotalMinor = safeMultiply(quantity, item.unitPriceMinor);
 
-    const lineTotalMinor =
-      safeMultiply(
-        quantity,
-        item.unitPriceMinor,
-      );
-
-    totalMinor =
-      safeAdd(
-        totalMinor,
-        lineTotalMinor,
-      );
+    totalMinor = safeAdd(totalMinor, lineTotalMinor);
 
     lines.push({
       catalogItemId: item.id,
       name: item.name,
-      pricingBasis:
-        item.pricingBasis,
+      pricingBasis: item.pricingBasis,
       quantity,
-      unitPriceMinor:
-        item.unitPriceMinor,
+      unitPriceMinor: item.unitPriceMinor,
       lineTotalMinor,
     });
   }
 
+  const budgetMinor = input.inquiry.budgetCents;
 
-  const budgetMinor =
-    input.inquiry.budgetCents;
+  const differenceFromBudgetMinor = budgetMinor === null ? null : totalMinor - budgetMinor;
 
-  const differenceFromBudgetMinor =
-    budgetMinor === null
-      ? null
-      : totalMinor - budgetMinor;
-
-  const withinBudget =
-    budgetMinor === null
-      ? null
-      : totalMinor <= budgetMinor;
+  const withinBudget = budgetMinor === null ? null : totalMinor <= budgetMinor;
 
   return {
-    catalogVersion:
-      input.catalogVersion,
+    catalogVersion: input.catalogVersion,
     currency: "SEK",
     lines,
     totalMinor,

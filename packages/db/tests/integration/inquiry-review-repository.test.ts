@@ -1,18 +1,7 @@
-import {
-  fileURLToPath,
-} from "node:url";
+import { fileURLToPath } from "node:url";
 
-import type {
-  InquiryExtraction,
-} from "@proposal-agent/domain";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "vitest";
+import type { InquiryExtraction } from "@proposal-agent/domain";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import {
   createDatabasePool,
@@ -20,31 +9,17 @@ import {
   PostgresInquiryReviewRepository,
   runMigrations,
 } from "../../src/index";
-import {
-  requireEnv,
-} from "../../src/env";
+import { requireEnv } from "../../src/env";
 
-const migrationsDirectory =
-  fileURLToPath(
-    new URL(
-      "../../migrations/",
-      import.meta.url,
-    ),
-  );
+const migrationsDirectory = fileURLToPath(new URL("../../migrations/", import.meta.url));
 
-const pool =
-  createDatabasePool(
-    requireEnv("TEST_DATABASE_URL"),
-  );
+const pool = createDatabasePool(requireEnv("TEST_DATABASE_URL"));
 
-const inquiryRepository =
-  new PostgresInquiryRepository(pool);
+const inquiryRepository = new PostgresInquiryRepository(pool);
 
-const reviewRepository =
-  new PostgresInquiryReviewRepository(pool);
+const reviewRepository = new PostgresInquiryReviewRepository(pool);
 
-function createExtraction():
-  InquiryExtraction {
+function createExtraction(): InquiryExtraction {
   return {
     guests: {
       value: 65,
@@ -80,8 +55,7 @@ function createExtraction():
       {
         value: "late checkout",
         confidence: 0.94,
-        source:
-          "preferably late checkout",
+        source: "preferably late checkout",
         requiresReview: true,
       },
     ],
@@ -89,179 +63,104 @@ function createExtraction():
 }
 
 beforeAll(async () => {
-  await runMigrations(
-    pool,
-    migrationsDirectory,
-  );
+  await runMigrations(pool, migrationsDirectory);
 });
 
 beforeEach(async () => {
-  await pool.query(
-    "TRUNCATE TABLE inquiries CASCADE",
-  );
+  await pool.query("TRUNCATE TABLE inquiries CASCADE");
 });
 
 afterAll(async () => {
   await pool.end();
 });
 
-describe(
-  "PostgresInquiryReviewRepository",
-  () => {
-    it(
-      "persists extraction and human decisions",
-      async () => {
-        const inquiry = {
-          id:
-            "3ac7f2de-7430-47d6-b63f-9c899eafd248",
-          rawText:
-            "65 people with preferably late checkout.",
-          createdAt:
-            new Date(
-              "2026-08-25T08:00:00.000Z",
-            ),
-        };
+describe("PostgresInquiryReviewRepository", () => {
+  it("persists extraction and human decisions", async () => {
+    const inquiry = {
+      id: "3ac7f2de-7430-47d6-b63f-9c899eafd248",
+      rawText: "65 people with preferably late checkout.",
+      createdAt: new Date("2026-08-25T08:00:00.000Z"),
+    };
 
-        await inquiryRepository.create(
-          inquiry,
-        );
+    await inquiryRepository.create(inquiry);
 
-        const extraction =
-          createExtraction();
+    const extraction = createExtraction();
 
-        await reviewRepository.replaceExtraction(
-          inquiry.id,
-          extraction,
-          new Date(
-            "2026-08-25T08:01:00.000Z",
-          ),
-        );
-
-        await reviewRepository.saveDecision(
-          inquiry.id,
-          {
-            field: "requirements.0",
-            kind: "accepted",
-            resolvedValue:
-              "late checkout",
-            reviewedAt:
-              new Date(
-                "2026-08-25T08:02:00.000Z",
-              ),
-          },
-        );
-
-        const persisted =
-          await reviewRepository.findByInquiryId(
-            inquiry.id,
-          );
-
-        expect(
-          persisted?.extraction,
-        ).toEqual(extraction);
-
-        expect(
-          persisted?.decisions,
-        ).toEqual([
-          {
-            field: "requirements.0",
-            kind: "accepted",
-            resolvedValue:
-              "late checkout",
-            reviewedAt:
-              new Date(
-                "2026-08-25T08:02:00.000Z",
-              ),
-          },
-        ]);
-      },
+    await reviewRepository.replaceExtraction(
+      inquiry.id,
+      extraction,
+      new Date("2026-08-25T08:01:00.000Z"),
     );
 
-    it(
-      "clears stale decisions when extraction is replaced",
-      async () => {
-        const inquiry = {
-          id:
-            "3ac7f2de-7430-47d6-b63f-9c899eafd248",
-          rawText:
-            "65 people with preferably late checkout.",
-          createdAt:
-            new Date(
-              "2026-08-25T08:00:00.000Z",
-            ),
-        };
+    await reviewRepository.saveDecision(inquiry.id, {
+      field: "requirements.0",
+      kind: "accepted",
+      resolvedValue: "late checkout",
+      reviewedAt: new Date("2026-08-25T08:02:00.000Z"),
+    });
 
-        await inquiryRepository.create(
-          inquiry,
-        );
+    const persisted = await reviewRepository.findByInquiryId(inquiry.id);
 
-        const extraction =
-          createExtraction();
+    expect(persisted?.extraction).toEqual(extraction);
 
-        await reviewRepository.replaceExtraction(
-          inquiry.id,
-          extraction,
-          new Date(
-            "2026-08-25T08:01:00.000Z",
-          ),
-        );
-
-        await reviewRepository.saveDecision(
-          inquiry.id,
-          {
-            field: "requirements.0",
-            kind: "accepted",
-            resolvedValue:
-              "late checkout",
-            reviewedAt:
-              new Date(
-                "2026-08-25T08:02:00.000Z",
-              ),
-          },
-        );
-
-        await reviewRepository.replaceExtraction(
-          inquiry.id,
-          extraction,
-          new Date(
-            "2026-08-25T08:03:00.000Z",
-          ),
-        );
-
-        const persisted =
-          await reviewRepository.findByInquiryId(
-            inquiry.id,
-          );
-
-        expect(
-          persisted?.decisions,
-        ).toEqual([]);
+    expect(persisted?.decisions).toEqual([
+      {
+        field: "requirements.0",
+        kind: "accepted",
+        resolvedValue: "late checkout",
+        reviewedAt: new Date("2026-08-25T08:02:00.000Z"),
       },
+    ]);
+  });
+
+  it("clears stale decisions when extraction is replaced", async () => {
+    const inquiry = {
+      id: "3ac7f2de-7430-47d6-b63f-9c899eafd248",
+      rawText: "65 people with preferably late checkout.",
+      createdAt: new Date("2026-08-25T08:00:00.000Z"),
+    };
+
+    await inquiryRepository.create(inquiry);
+
+    const extraction = createExtraction();
+
+    await reviewRepository.replaceExtraction(
+      inquiry.id,
+      extraction,
+      new Date("2026-08-25T08:01:00.000Z"),
     );
 
-    it(
-      "rejects malformed persisted extraction JSON",
-      async () => {
-        const inquiry = {
-          id:
-            "3ac7f2de-7430-47d6-b63f-9c899eafd248",
-          rawText:
-            "Malformed extraction boundary test.",
-          createdAt:
-            new Date(
-              "2026-08-25T08:00:00.000Z",
-            ),
-        };
+    await reviewRepository.saveDecision(inquiry.id, {
+      field: "requirements.0",
+      kind: "accepted",
+      resolvedValue: "late checkout",
+      reviewedAt: new Date("2026-08-25T08:02:00.000Z"),
+    });
 
-        await inquiryRepository.create(
-          inquiry,
-        );
+    await reviewRepository.replaceExtraction(
+      inquiry.id,
+      extraction,
+      new Date("2026-08-25T08:03:00.000Z"),
+    );
 
-        const extraction =
-          createExtraction();
+    const persisted = await reviewRepository.findByInquiryId(inquiry.id);
 
-        await pool.query(
-          `
+    expect(persisted?.decisions).toEqual([]);
+  });
+
+  it("rejects malformed persisted extraction JSON", async () => {
+    const inquiry = {
+      id: "3ac7f2de-7430-47d6-b63f-9c899eafd248",
+      rawText: "Malformed extraction boundary test.",
+      createdAt: new Date("2026-08-25T08:00:00.000Z"),
+    };
+
+    await inquiryRepository.create(inquiry);
+
+    const extraction = createExtraction();
+
+    await pool.query(
+      `
             INSERT INTO inquiry_extractions (
               inquiry_id,
               extraction,
@@ -269,29 +168,21 @@ describe(
             )
             VALUES ($1, $2::jsonb, $3)
           `,
-          [
-            inquiry.id,
-            JSON.stringify({
-              ...extraction,
-              guests: {
-                ...extraction.guests,
-                confidence: "invalid",
-              },
-            }),
-            new Date(
-              "2026-08-25T08:01:00.000Z",
-            ),
-          ],
-        );
-
-        await expect(
-          reviewRepository.findByInquiryId(
-            inquiry.id,
-          ),
-        ).rejects.toThrow(
-          "Persisted inquiry extraction is invalid.",
-        );
-      },
+      [
+        inquiry.id,
+        JSON.stringify({
+          ...extraction,
+          guests: {
+            ...extraction.guests,
+            confidence: "invalid",
+          },
+        }),
+        new Date("2026-08-25T08:01:00.000Z"),
+      ],
     );
-  },
-);
+
+    await expect(reviewRepository.findByInquiryId(inquiry.id)).rejects.toThrow(
+      "Persisted inquiry extraction is invalid.",
+    );
+  });
+});

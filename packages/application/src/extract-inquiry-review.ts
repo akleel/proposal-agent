@@ -1,21 +1,9 @@
-import type {
-  InquiryReviewState,
-} from "./inquiry-review-state";
-import {
-  toInquiryReviewState,
-} from "./inquiry-review-state";
-import type {
-  InquiryExtractor,
-} from "./inquiry-extractor";
-import type {
-  InquiryRepository,
-} from "./inquiry-repository";
-import type {
-  InquiryReviewRepository,
-} from "./inquiry-review-repository";
-import {
-  extractInquiry,
-} from "./extract-inquiry";
+import type { InquiryReviewState } from "./inquiry-review-state";
+import { toInquiryReviewState } from "./inquiry-review-state";
+import type { InquiryExtractor } from "./inquiry-extractor";
+import type { InquiryRepository } from "./inquiry-repository";
+import type { InquiryReviewRepository } from "./inquiry-review-repository";
+import { extractInquiry } from "./extract-inquiry";
 
 export interface ExtractInquiryReviewDependencies {
   readonly inquiryRepository: InquiryRepository;
@@ -28,10 +16,7 @@ export async function extractInquiryReview(
   dependencies: ExtractInquiryReviewDependencies,
   inquiryId: string,
 ): Promise<InquiryReviewState | null> {
-  const inquiry =
-    await dependencies.inquiryRepository.findById(
-      inquiryId,
-    );
+  const inquiry = await dependencies.inquiryRepository.findById(inquiryId);
 
   if (!inquiry) {
     return null;
@@ -46,21 +31,12 @@ export async function extractInquiryReview(
     },
   );
 
-  await dependencies.reviewRepository.replaceExtraction(
-    inquiry.id,
-    extraction,
-    dependencies.now(),
-  );
+  await dependencies.reviewRepository.replaceExtraction(inquiry.id, extraction, dependencies.now());
 
-  const persisted =
-    await dependencies.reviewRepository.findByInquiryId(
-      inquiry.id,
-    );
+  const persisted = await dependencies.reviewRepository.findByInquiryId(inquiry.id);
 
   if (!persisted) {
-    throw new Error(
-      "Persisted inquiry extraction could not be reloaded.",
-    );
+    throw new Error("Persisted inquiry extraction could not be reloaded.");
   }
 
   return toInquiryReviewState(persisted);

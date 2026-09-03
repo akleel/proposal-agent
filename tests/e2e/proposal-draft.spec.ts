@@ -1,13 +1,6 @@
-import {
-  expect,
-  test,
-  type Locator,
-  type Page,
-} from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
-import type {
-  InquiryExtraction,
-} from "../../packages/domain/src/index";
+import type { InquiryExtraction } from "../../packages/domain/src/index";
 
 import {
   deleteInquiryById,
@@ -30,8 +23,7 @@ const catalogItemIds = [
   "late_checkout_room",
 ] as const;
 
-function createDeterministicExtraction():
-  InquiryExtraction {
+function createDeterministicExtraction(): InquiryExtraction {
   return {
     guests: {
       value: 20,
@@ -98,82 +90,43 @@ function createDeterministicExtraction():
   };
 }
 
-async function createInquiry(
-  page: Page,
-): Promise<string> {
-  await page.goto(
-    "/inquiries/new",
-  );
+async function createInquiry(page: Page): Promise<string> {
+  await page.goto("/inquiries/new");
 
-  await page
-    .getByLabel(
-      "Customer inquiry",
-    )
-    .fill(
-      inquiryText,
-    );
+  await page.getByLabel("Customer inquiry").fill(inquiryText);
 
   await Promise.all([
     page.waitForURL(
       /\/inquiries\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     ),
     page
-      .getByRole(
-        "button",
-        {
-          name:
-            "Create inquiry",
-        },
-      )
+      .getByRole("button", {
+        name: "Create inquiry",
+      })
       .click(),
   ]);
 
-  const match =
-    page
-      .url()
-      .match(
-        /\/inquiries\/([0-9a-f-]+)$/i,
-      );
+  const match = page.url().match(/\/inquiries\/([0-9a-f-]+)$/i);
 
   if (!match?.[1]) {
-    throw new Error(
-      "Could not read inquiry identifier from URL.",
-    );
+    throw new Error("Could not read inquiry identifier from URL.");
   }
 
   return match[1];
 }
 
-async function expectMinorAmount(
-  locator: Locator,
-  expectedMinor: number,
-): Promise<void> {
-  await expect(
-    locator,
-  ).toBeVisible();
+async function expectMinorAmount(locator: Locator, expectedMinor: number): Promise<void> {
+  await expect(locator).toBeVisible();
 
-  const text =
-    await locator.textContent();
+  const text = await locator.textContent();
 
   if (!text) {
-    throw new Error(
-      "Expected a rendered currency amount.",
-    );
+    throw new Error("Expected a rendered currency amount.");
   }
 
-  const digits =
-    text.replace(
-      /\D/g,
-      "",
-    );
+  const digits = text.replace(/\D/g, "");
 
-  expect(
-    digits,
-  ).toBe(
-    String(
-      expectedMinor,
-    ),
-  );
+  expect(digits).toBe(String(expectedMinor));
 }
 
 async function expectPricingRow(
@@ -182,105 +135,47 @@ async function expectPricingRow(
   quantity: number,
   lineTotalMinor: number,
 ): Promise<void> {
-  const row =
-    page
-      .getByRole(
-        "row",
-      )
-      .filter({
-        hasText: name,
-      });
+  const row = page.getByRole("row").filter({
+    hasText: name,
+  });
 
-  await expect(
-    row,
-  ).toHaveCount(1);
+  await expect(row).toHaveCount(1);
 
-  const cells =
-    row.locator(
-      "td",
-    );
+  const cells = row.locator("td");
 
-  await expect(
-    cells.nth(1),
-  ).toHaveText(
-    String(quantity),
-  );
+  await expect(cells.nth(1)).toHaveText(String(quantity));
 
-  await expectMinorAmount(
-    cells.nth(3),
-    lineTotalMinor,
-  );
+  await expectMinorAmount(cells.nth(3), lineTotalMinor);
 }
 
-async function resolveInquiryReview(
-  page: Page,
-): Promise<void> {
-  await page
-    .getByLabel(
-      "Corrected value",
-    )
-    .fill(
-      "2026-10-16",
-    );
+async function resolveInquiryReview(page: Page): Promise<void> {
+  await page.getByLabel("Corrected value").fill("2026-10-16");
 
   await page
-    .getByRole(
-      "button",
-      {
-        name:
-          "Save correction",
-      },
-    )
+    .getByRole("button", {
+      name: "Save correction",
+    })
     .click();
 
   await expect(
-    page.getByRole(
-      "heading",
-      {
-        name:
-          "Resolved inquiry ready",
-      },
-    ),
+    page.getByRole("heading", {
+      name: "Resolved inquiry ready",
+    }),
   ).toBeVisible();
 }
 
-async function selectPricing(
-  page: Page,
-): Promise<void> {
-  for (
-    const catalogItemId
-    of catalogItemIds
-  ) {
+async function selectPricing(page: Page): Promise<void> {
+  for (const catalogItemId of catalogItemIds) {
     await page
-      .locator(
-        `input[type="checkbox"][name="catalogItemId"][value="${catalogItemId}"]`,
-      )
+      .locator(`input[type="checkbox"][name="catalogItemId"][value="${catalogItemId}"]`)
       .check();
   }
 
-  await page
-    .locator(
-      'input[name="occurrences:meeting_room_day"]',
-    )
-    .fill(
-      "2",
-    );
+  await page.locator('input[name="occurrences:meeting_room_day"]').fill("2");
 
-  await page
-    .locator(
-      'input[name="occurrences:breakfast_person"]',
-    )
-    .fill(
-      "2",
-    );
+  await page.locator('input[name="occurrences:breakfast_person"]').fill("2");
 
-  await page
-    .locator(
-      'input[name="occurrences:dinner_person"]',
-    )
-    .fill(
-      "1",
-    );
+  await page.locator('input[name="occurrences:dinner_person"]').fill("1");
 }
 
 async function expectProposalSnapshot(
@@ -288,288 +183,130 @@ async function expectProposalSnapshot(
   inquiryId: string,
   proposalId: string,
 ): Promise<void> {
+  await expect(page.getByTestId("proposal-draft")).toBeVisible();
+
   await expect(
-    page.getByTestId(
-      "proposal-draft",
-    ),
+    page.getByRole("heading", {
+      name: "Review-ready proposal draft",
+    }),
+  ).toBeVisible();
+
+  await expect(page.getByTestId("proposal-status")).toHaveText("Draft · not approved · not sent");
+
+  await expect(page.getByTestId("proposal-catalog-version")).toHaveText("2026-08-demo-v1");
+
+  await expect(page.getByTestId("proposal-inquiry-id")).toHaveText(inquiryId);
+
+  await expect(
+    page.getByText(proposalId, {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  await expect(page.getByTestId("proposal-guests")).toHaveText("20");
+
+  await expect(page.getByTestId("proposal-rooms")).toHaveText("10");
+
+  await expect(page.getByTestId("proposal-start-date")).toHaveText("2026-10-14");
+
+  await expect(page.getByTestId("proposal-end-date")).toHaveText("2026-10-16");
+
+  await expectPricingRow(page, "Hotel room", 20, 3_000_000);
+
+  await expectPricingRow(page, "Meeting room", 2, 1_200_000);
+
+  await expectPricingRow(page, "Breakfast", 40, 720_000);
+
+  await expectPricingRow(page, "Dinner", 20, 900_000);
+
+  await expectPricingRow(page, "Late checkout", 10, 300_000);
+
+  await expectMinorAmount(page.getByTestId("proposal-total"), 6_120_000);
+
+  const budgetStatus = page.getByTestId("proposal-budget-status");
+
+  await expect(budgetStatus).toContainText("over customer budget");
+
+  await expectMinorAmount(budgetStatus, 1_120_000);
+
+  await expect(
+    page.getByText("company offsite", {
+      exact: true,
+    }),
   ).toBeVisible();
 
   await expect(
-    page.getByRole(
-      "heading",
-      {
-        name:
-          "Review-ready proposal draft",
-      },
-    ),
-  ).toBeVisible();
-
-  await expect(
-    page.getByTestId(
-      "proposal-status",
-    ),
-  ).toHaveText(
-    "Draft · not approved · not sent",
-  );
-
-  await expect(
-    page.getByTestId(
-      "proposal-catalog-version",
-    ),
-  ).toHaveText(
-    "2026-08-demo-v1",
-  );
-
-  await expect(
-    page.getByTestId(
-      "proposal-inquiry-id",
-    ),
-  ).toHaveText(
-    inquiryId,
-  );
-
-  await expect(
-    page.getByText(
-      proposalId,
-      {
-        exact: true,
-      },
-    ),
-  ).toBeVisible();
-
-  await expect(
-    page.getByTestId(
-      "proposal-guests",
-    ),
-  ).toHaveText(
-    "20",
-  );
-
-  await expect(
-    page.getByTestId(
-      "proposal-rooms",
-    ),
-  ).toHaveText(
-    "10",
-  );
-
-  await expect(
-    page.getByTestId(
-      "proposal-start-date",
-    ),
-  ).toHaveText(
-    "2026-10-14",
-  );
-
-  await expect(
-    page.getByTestId(
-      "proposal-end-date",
-    ),
-  ).toHaveText(
-    "2026-10-16",
-  );
-
-  await expectPricingRow(
-    page,
-    "Hotel room",
-    20,
-    3_000_000,
-  );
-
-  await expectPricingRow(
-    page,
-    "Meeting room",
-    2,
-    1_200_000,
-  );
-
-  await expectPricingRow(
-    page,
-    "Breakfast",
-    40,
-    720_000,
-  );
-
-  await expectPricingRow(
-    page,
-    "Dinner",
-    20,
-    900_000,
-  );
-
-  await expectPricingRow(
-    page,
-    "Late checkout",
-    10,
-    300_000,
-  );
-
-  await expectMinorAmount(
-    page.getByTestId(
-      "proposal-total",
-    ),
-    6_120_000,
-  );
-
-  const budgetStatus =
-    page.getByTestId(
-      "proposal-budget-status",
-    );
-
-  await expect(
-    budgetStatus,
-  ).toContainText(
-    "over customer budget",
-  );
-
-  await expectMinorAmount(
-    budgetStatus,
-    1_120_000,
-  );
-
-  await expect(
-    page.getByText(
-      "company offsite",
-      {
-        exact: true,
-      },
-    ),
-  ).toBeVisible();
-
-  await expect(
-    page.getByText(
-      "late checkout",
-      {
-        exact: true,
-      },
-    ),
+    page.getByText("late checkout", {
+      exact: true,
+    }),
   ).toBeVisible();
 }
 
-test(
-  "creates and reloads a persisted review-ready proposal draft",
-  async ({
-    page,
-  }) => {
-    let inquiryId:
-      string | null = null;
+test("creates and reloads a persisted review-ready proposal draft", async ({ page }) => {
+  let inquiryId: string | null = null;
 
-    let proposalId:
-      string | null = null;
+  let proposalId: string | null = null;
 
-    try {
-      inquiryId =
-        await createInquiry(
-          page,
-        );
+  try {
+    inquiryId = await createInquiry(page);
 
-      await seedInquiryExtraction(
-        inquiryId,
-        createDeterministicExtraction(),
-      );
+    await seedInquiryExtraction(inquiryId, createDeterministicExtraction());
 
-      await page.reload();
+    await page.reload();
 
-      await expect(
-        page.getByText(
-          "1 unresolved of 1",
-          {
-            exact: true,
-          },
-        ),
-      ).toBeVisible();
+    await expect(
+      page.getByText("1 unresolved of 1", {
+        exact: true,
+      }),
+    ).toBeVisible();
 
-      await resolveInquiryReview(
-        page,
-      );
+    await resolveInquiryReview(page);
 
-      await selectPricing(
-        page,
-      );
+    await selectPricing(page);
 
-      await page
-        .getByRole(
-          "button",
-          {
-            name:
-              "Calculate pricing",
-          },
-        )
-        .click();
+    await page
+      .getByRole("button", {
+        name: "Calculate pricing",
+      })
+      .click();
 
-      await expectMinorAmount(
-        page.getByTestId(
-          "pricing-total",
-        ),
-        6_120_000,
-      );
+    await expectMinorAmount(page.getByTestId("pricing-total"), 6_120_000);
 
-      const createDraftButton =
-        page.getByTestId(
-          "create-proposal-draft",
-        );
+    const createDraftButton = page.getByTestId("create-proposal-draft");
 
-      await expect(
-        createDraftButton,
-      ).toBeEnabled();
+    await expect(createDraftButton).toBeEnabled();
 
-      await Promise.all([
-        page.waitForURL(
-          /\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-        ),
-        createDraftButton.click(),
-      ]);
+    await Promise.all([
+      page.waitForURL(
+        /\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+      ),
+      createDraftButton.click(),
+    ]);
 
-      const proposalMatch =
-        page
-          .url()
-          .match(
-            /\/proposals\/([0-9a-f-]+)$/i,
-          );
+    const proposalMatch = page.url().match(/\/proposals\/([0-9a-f-]+)$/i);
 
-      if (!proposalMatch?.[1]) {
-        throw new Error(
-          "Could not read proposal draft identifier from URL.",
-        );
-      }
-
-      proposalId =
-        proposalMatch[1];
-
-      await expectProposalSnapshot(
-        page,
-        inquiryId,
-        proposalId,
-      );
-
-      const proposalUrl =
-        page.url();
-
-      await page.reload();
-
-      expect(
-        page.url(),
-      ).toBe(
-        proposalUrl,
-      );
-
-      await expectProposalSnapshot(
-        page,
-        inquiryId,
-        proposalId,
-      );
-    } finally {
-      if (proposalId) {
-        await deleteProposalDraftById(
-          proposalId,
-        );
-      }
-
-      if (inquiryId) {
-        await deleteInquiryById(
-          inquiryId,
-        );
-      }
+    if (!proposalMatch?.[1]) {
+      throw new Error("Could not read proposal draft identifier from URL.");
     }
-  },
-);
+
+    proposalId = proposalMatch[1];
+
+    await expectProposalSnapshot(page, inquiryId, proposalId);
+
+    const proposalUrl = page.url();
+
+    await page.reload();
+
+    expect(page.url()).toBe(proposalUrl);
+
+    await expectProposalSnapshot(page, inquiryId, proposalId);
+  } finally {
+    if (proposalId) {
+      await deleteProposalDraftById(proposalId);
+    }
+
+    if (inquiryId) {
+      await deleteInquiryById(inquiryId);
+    }
+  }
+});

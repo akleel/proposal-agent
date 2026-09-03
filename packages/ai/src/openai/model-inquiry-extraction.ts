@@ -1,6 +1,4 @@
-import {
-  isoDateSchema,
-} from "@proposal-agent/contracts";
+import { isoDateSchema } from "@proposal-agent/contracts";
 import { z } from "zod";
 
 const confidenceSchema = z
@@ -19,9 +17,7 @@ const sourceSchema = z
     "A short exact excerpt supporting the value. Use null when the inquiry contains no supporting text.",
   );
 
-function modelFieldSchema<T extends z.ZodType>(
-  valueSchema: T,
-) {
+function modelFieldSchema<T extends z.ZodType>(valueSchema: T) {
   return z.object({
     value: valueSchema,
     confidence: confidenceSchema,
@@ -36,9 +32,7 @@ export const modelInquiryExtractionSchema = z.object({
       .int()
       .positive()
       .nullable()
-      .describe(
-        "Number of guests explicitly stated or safely extractable from the inquiry.",
-      ),
+      .describe("Number of guests explicitly stated or safely extractable from the inquiry."),
   ),
 
   rooms: modelFieldSchema(
@@ -47,18 +41,12 @@ export const modelInquiryExtractionSchema = z.object({
       .int()
       .nonnegative()
       .nullable()
-      .describe(
-        "Number of rooms explicitly requested. Use null when not stated.",
-      ),
+      .describe("Number of rooms explicitly requested. Use null when not stated."),
   ),
 
-  startDate: modelFieldSchema(
-    isoDateSchema.nullable(),
-  ),
+  startDate: modelFieldSchema(isoDateSchema.nullable()),
 
-  endDate: modelFieldSchema(
-    isoDateSchema.nullable(),
-  ),
+  endDate: modelFieldSchema(isoDateSchema.nullable()),
 
   budgetCents: modelFieldSchema(
     z
@@ -76,13 +64,9 @@ export const modelInquiryExtractionSchema = z.object({
       z
         .string()
         .min(1)
-        .describe(
-          "A concise customer requirement directly supported by the inquiry.",
-        ),
+        .describe("A concise customer requirement directly supported by the inquiry."),
     ),
   ),
 });
 
-export type ModelInquiryExtraction = z.infer<
-  typeof modelInquiryExtractionSchema
->;
+export type ModelInquiryExtraction = z.infer<typeof modelInquiryExtractionSchema>;

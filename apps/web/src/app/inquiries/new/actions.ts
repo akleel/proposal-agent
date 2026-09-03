@@ -1,8 +1,6 @@
 "use server";
 
-import {
-  consumeDemoWriteRateLimit,
-} from "@/lib/server/demo-rate-limit";
+import { consumeDemoWriteRateLimit } from "@/lib/server/demo-rate-limit";
 
 import { createInquiryInputSchema } from "@proposal-agent/contracts";
 import { redirect } from "next/navigation";
@@ -40,27 +38,22 @@ export async function createInquiryAction(
   let inquiryId: string;
 
   try {
-    const rateLimit =
-      await consumeDemoWriteRateLimit();
+    const rateLimit = await consumeDemoWriteRateLimit();
 
     if (!rateLimit.allowed) {
       return {
         errors: {},
-        message:
-          "The public demo write limit has been reached. Please try again later.",
+        message: "The public demo write limit has been reached. Please try again later.",
       };
     }
 
-    const inquiry = await createInquiryUseCase(
-      parsed.data.rawText,
-    );
+    const inquiry = await createInquiryUseCase(parsed.data.rawText);
 
     inquiryId = inquiry.id;
   } catch {
     return {
       errors: {},
-      message:
-        "The inquiry could not be saved. Please try again.",
+      message: "The inquiry could not be saved. Please try again.",
     };
   }
 

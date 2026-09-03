@@ -1,11 +1,5 @@
-import {
-  getReviewIssues,
-} from "@proposal-agent/domain";
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { getReviewIssues } from "@proposal-agent/domain";
+import { describe, expect, it } from "vitest";
 
 import {
   modelInquiryExtractionSchema,
@@ -56,9 +50,7 @@ describe("modelInquiryExtractionSchema", () => {
 
     candidate.guests.confidence = 1.5;
 
-    expect(() =>
-      modelInquiryExtractionSchema.parse(candidate),
-    ).toThrow();
+    expect(() => modelInquiryExtractionSchema.parse(candidate)).toThrow();
   });
 
   it("accepts null source for absent information", () => {
@@ -68,9 +60,7 @@ describe("modelInquiryExtractionSchema", () => {
     candidate.rooms.confidence = 0;
     candidate.rooms.source = null;
 
-    expect(() =>
-      modelInquiryExtractionSchema.parse(candidate),
-    ).not.toThrow();
+    expect(() => modelInquiryExtractionSchema.parse(candidate)).not.toThrow();
   });
 
   it("rejects impossible calendar dates", () => {
@@ -79,9 +69,7 @@ describe("modelInquiryExtractionSchema", () => {
     candidate.startDate.value = "2026-02-30";
     candidate.startDate.source = "2026-02-30";
 
-    expect(() =>
-      modelInquiryExtractionSchema.parse(candidate),
-    ).toThrow();
+    expect(() => modelInquiryExtractionSchema.parse(candidate)).toThrow();
   });
 });
 
@@ -91,24 +79,16 @@ describe("toInquiryExtraction", () => {
     "meeting space for everyone, with a budget of SEK 180,000.";
 
   it("keeps strongly supported fields out of review", () => {
-    const extraction = toInquiryExtraction(
-      rawText,
-      createModelExtraction(),
-    );
+    const extraction = toInquiryExtraction(rawText, createModelExtraction());
 
     expect(extraction.guests.requiresReview).toBe(false);
     expect(extraction.rooms.requiresReview).toBe(false);
     expect(extraction.budgetCents.requiresReview).toBe(false);
-    expect(
-      extraction.requirements[0]?.requiresReview,
-    ).toBe(false);
+    expect(extraction.requirements[0]?.requiresReview).toBe(false);
   });
 
   it("requires review for null values", () => {
-    const extraction = toInquiryExtraction(
-      rawText,
-      createModelExtraction(),
-    );
+    const extraction = toInquiryExtraction(rawText, createModelExtraction());
 
     expect(extraction.startDate.requiresReview).toBe(true);
     expect(extraction.endDate.requiresReview).toBe(true);
@@ -121,10 +101,7 @@ describe("toInquiryExtraction", () => {
     modelExtraction.rooms.confidence = 0;
     modelExtraction.rooms.source = null;
 
-    const extraction = toInquiryExtraction(
-      "We are planning a company event.",
-      modelExtraction,
-    );
+    const extraction = toInquiryExtraction("We are planning a company event.", modelExtraction);
 
     expect(extraction.rooms.value).toBeNull();
     expect(extraction.rooms.source).toBeNull();
@@ -134,36 +111,23 @@ describe("toInquiryExtraction", () => {
   it("removes decorative wrapping quotes from source evidence", () => {
     const modelExtraction = createModelExtraction();
 
-    modelExtraction.startDate.source =
-      '"14-16 October"';
+    modelExtraction.startDate.source = '"14-16 October"';
 
-    modelExtraction.budgetCents.source =
-      '"SEK 180,000"';
+    modelExtraction.budgetCents.source = '"SEK 180,000"';
 
-    const extraction = toInquiryExtraction(
-      rawText,
-      modelExtraction,
-    );
+    const extraction = toInquiryExtraction(rawText, modelExtraction);
 
-    expect(extraction.startDate.source).toBe(
-      "14-16 October",
-    );
+    expect(extraction.startDate.source).toBe("14-16 October");
 
-    expect(extraction.budgetCents.source).toBe(
-      "SEK 180,000",
-    );
+    expect(extraction.budgetCents.source).toBe("SEK 180,000");
   });
 
   it("requires review when source evidence is fabricated", () => {
     const modelExtraction = createModelExtraction();
 
-    modelExtraction.rooms.source =
-      "forty luxury suites";
+    modelExtraction.rooms.source = "forty luxury suites";
 
-    const extraction = toInquiryExtraction(
-      rawText,
-      modelExtraction,
-    );
+    const extraction = toInquiryExtraction(rawText, modelExtraction);
 
     expect(extraction.rooms.requiresReview).toBe(true);
   });
@@ -173,10 +137,7 @@ describe("toInquiryExtraction", () => {
 
     modelExtraction.rooms.source = null;
 
-    const extraction = toInquiryExtraction(
-      rawText,
-      modelExtraction,
-    );
+    const extraction = toInquiryExtraction(rawText, modelExtraction);
 
     expect(extraction.rooms.value).toBe(35);
     expect(extraction.rooms.requiresReview).toBe(true);
@@ -189,10 +150,7 @@ describe("toInquiryExtraction", () => {
     modelExtraction.budgetCents.confidence = 0.99;
     modelExtraction.budgetCents.source = "EUR 28,000";
 
-    const extraction = toInquiryExtraction(
-      "Customer budget is EUR 28,000.",
-      modelExtraction,
-    );
+    const extraction = toInquiryExtraction("Customer budget is EUR 28,000.", modelExtraction);
 
     expect(extraction.budgetCents).toEqual({
       value: null,
@@ -203,16 +161,9 @@ describe("toInquiryExtraction", () => {
   });
 
   it("produces domain review issues deterministically", () => {
-    const extraction = toInquiryExtraction(
-      rawText,
-      createModelExtraction(),
-    );
+    const extraction = toInquiryExtraction(rawText, createModelExtraction());
 
-    expect(
-      getReviewIssues(extraction).map(
-        (issue) => issue.field,
-      ),
-    ).toEqual([
+    expect(getReviewIssues(extraction).map((issue) => issue.field)).toEqual([
       "startDate",
       "endDate",
     ]);

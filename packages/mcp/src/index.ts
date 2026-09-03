@@ -1,6 +1,4 @@
-export {
-  createProposalMcpServer,
-} from "./server";
+export { createProposalMcpServer } from "./server";
 
 export {
   calculatePricingTool,

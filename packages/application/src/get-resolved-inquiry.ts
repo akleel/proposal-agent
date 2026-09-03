@@ -1,41 +1,28 @@
-import {
-  resolveReviewedInquiry,
-  type ResolvedInquiry,
-} from "@proposal-agent/domain";
+import { resolveReviewedInquiry, type ResolvedInquiry } from "@proposal-agent/domain";
 
-import type {
-  InquiryReviewRepository,
-} from "./inquiry-review-repository";
+import type { InquiryReviewRepository } from "./inquiry-review-repository";
 
 export type GetResolvedInquiryResult =
   | {
-      readonly status:
-        "not_extracted";
+      readonly status: "not_extracted";
     }
   | {
-      readonly status:
-        "review_required";
+      readonly status: "review_required";
     }
   | {
       readonly status: "ready";
-      readonly inquiry:
-        ResolvedInquiry;
+      readonly inquiry: ResolvedInquiry;
     };
 
 export interface GetResolvedInquiryDependencies {
-  readonly reviewRepository:
-    InquiryReviewRepository;
+  readonly reviewRepository: InquiryReviewRepository;
 }
 
 export async function getResolvedInquiry(
-  dependencies:
-    GetResolvedInquiryDependencies,
+  dependencies: GetResolvedInquiryDependencies,
   inquiryId: string,
 ): Promise<GetResolvedInquiryResult> {
-  const review =
-    await dependencies.reviewRepository.findByInquiryId(
-      inquiryId,
-    );
+  const review = await dependencies.reviewRepository.findByInquiryId(inquiryId);
 
   if (!review) {
     return {
@@ -43,11 +30,7 @@ export async function getResolvedInquiry(
     };
   }
 
-  const inquiry =
-    resolveReviewedInquiry(
-      review.extraction,
-      review.decisions,
-    );
+  const inquiry = resolveReviewedInquiry(review.extraction, review.decisions);
 
   if (!inquiry) {
     return {

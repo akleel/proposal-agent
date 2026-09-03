@@ -1,12 +1,7 @@
 import { extractedInquirySchema } from "@proposal-agent/contracts";
-import type {
-  InquiryExtraction,
-  ReviewableField,
-} from "@proposal-agent/domain";
+import type { InquiryExtraction, ReviewableField } from "@proposal-agent/domain";
 
-import type {
-  ModelInquiryExtraction,
-} from "./model-inquiry-extraction";
+import type { ModelInquiryExtraction } from "./model-inquiry-extraction";
 
 const REVIEW_CONFIDENCE_THRESHOLD = 0.95;
 
@@ -16,18 +11,14 @@ interface ModelField<T> {
   readonly source: string | null;
 }
 
-function stripDecorativeWrappingQuotes(
-  source: string | null,
-): string | null {
+function stripDecorativeWrappingQuotes(source: string | null): string | null {
   if (source === null) {
     return null;
   }
 
   const trimmed = source.trim();
 
-  const quotePairs: ReadonlyArray<
-    readonly [string, string]
-  > = [
+  const quotePairs: ReadonlyArray<readonly [string, string]> = [
     ['"', '"'],
     ["'", "'"],
     ["“", "”"],
@@ -40,10 +31,7 @@ function stripDecorativeWrappingQuotes(
       trimmed.endsWith(closing) &&
       trimmed.length > opening.length + closing.length
     ) {
-      return trimmed.slice(
-        opening.length,
-        trimmed.length - closing.length,
-      );
+      return trimmed.slice(opening.length, trimmed.length - closing.length);
     }
   }
 
@@ -51,16 +39,10 @@ function stripDecorativeWrappingQuotes(
 }
 
 function normalizeEvidence(value: string): string {
-  return value
-    .toLocaleLowerCase("en")
-    .replace(/\s+/g, " ")
-    .trim();
+  return value.toLocaleLowerCase("en").replace(/\s+/g, " ").trim();
 }
 
-function hasSourceEvidence(
-  rawText: string,
-  source: string | null,
-): boolean {
+function hasSourceEvidence(rawText: string, source: string | null): boolean {
   if (source === null) {
     return false;
   }
@@ -68,19 +50,11 @@ function hasSourceEvidence(
   const normalizedInquiry = normalizeEvidence(rawText);
   const normalizedSource = normalizeEvidence(source);
 
-  return (
-    normalizedSource.length > 0 &&
-    normalizedInquiry.includes(normalizedSource)
-  );
+  return normalizedSource.length > 0 && normalizedInquiry.includes(normalizedSource);
 }
 
-function toReviewableField<T>(
-  rawText: string,
-  field: ModelField<T>,
-): ReviewableField<T> {
-  const source = stripDecorativeWrappingQuotes(
-    field.source,
-  );
+function toReviewableField<T>(rawText: string, field: ModelField<T>): ReviewableField<T> {
+  const source = stripDecorativeWrappingQuotes(field.source);
 
   const requiresReview =
     field.value === null ||
@@ -100,19 +74,11 @@ function toBudgetField(
   rawText: string,
   field: ModelField<number | null>,
 ): ReviewableField<number | null> {
-  const candidate = toReviewableField(
-    rawText,
-    field,
-  );
+  const candidate = toReviewableField(rawText, field);
 
-  const hasExplicitSek =
-    candidate.source !== null &&
-    /\bSEK\b/i.test(candidate.source);
+  const hasExplicitSek = candidate.source !== null && /\bSEK\b/i.test(candidate.source);
 
-  if (
-    candidate.value !== null &&
-    !hasExplicitSek
-  ) {
+  if (candidate.value !== null && !hasExplicitSek) {
     return {
       ...candidate,
       value: null,
@@ -128,29 +94,13 @@ export function toInquiryExtraction(
   modelExtraction: ModelInquiryExtraction,
 ): InquiryExtraction {
   const candidate = {
-    guests: toReviewableField(
-      rawText,
-      modelExtraction.guests,
-    ),
-    rooms: toReviewableField(
-      rawText,
-      modelExtraction.rooms,
-    ),
-    startDate: toReviewableField(
-      rawText,
-      modelExtraction.startDate,
-    ),
-    endDate: toReviewableField(
-      rawText,
-      modelExtraction.endDate,
-    ),
-    budgetCents: toBudgetField(
-      rawText,
-      modelExtraction.budgetCents,
-    ),
-    requirements: modelExtraction.requirements.map(
-      (requirement) =>
-        toReviewableField(rawText, requirement),
+    guests: toReviewableField(rawText, modelExtraction.guests),
+    rooms: toReviewableField(rawText, modelExtraction.rooms),
+    startDate: toReviewableField(rawText, modelExtraction.startDate),
+    endDate: toReviewableField(rawText, modelExtraction.endDate),
+    budgetCents: toBudgetField(rawText, modelExtraction.budgetCents),
+    requirements: modelExtraction.requirements.map((requirement) =>
+      toReviewableField(rawText, requirement),
     ),
   };
 

@@ -10,10 +10,7 @@ export default function NewInquiryPage() {
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16">
       <div className="mx-auto max-w-3xl">
-        <Link
-          href="/"
-          className="text-sm font-medium text-zinc-600 hover:text-zinc-950"
-        >
+        <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-950">
           ← Proposal Agent
         </Link>
 
@@ -28,8 +25,7 @@ export default function NewInquiryPage() {
             </h1>
 
             <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600">
-              Start with the source material exactly as the
-              salesperson received it.
+              Start with the source material exactly as the salesperson received it.
             </p>
           </div>
 

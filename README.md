@@ -16,27 +16,27 @@ approval, or final proposal state.
 
 ## Current status
 
-| Capability | Status |
-| --- | --- |
-| Create inquiry in browser | Implemented |
-| Persist inquiry in PostgreSQL | Implemented |
-| Reload persisted inquiry by ID | Implemented |
-| Provider-neutral AI port | Implemented |
-| OpenAI Structured Outputs adapter | Implemented |
-| Evidence-backed extraction | Implemented |
-| Deterministic review policy | Implemented |
+| Capability                           | Status      |
+| ------------------------------------ | ----------- |
+| Create inquiry in browser            | Implemented |
+| Persist inquiry in PostgreSQL        | Implemented |
+| Reload persisted inquiry by ID       | Implemented |
+| Provider-neutral AI port             | Implemented |
+| OpenAI Structured Outputs adapter    | Implemented |
+| Evidence-backed extraction           | Implemented |
+| Deterministic review policy          | Implemented |
 | Prompt-injection security evaluation | Implemented |
-| PostgreSQL integration tests | Implemented |
-| Playwright browser E2E | Implemented |
-| GitHub Actions CI | Implemented |
-| AI extraction in browser UI | Implemented |
-| Human review UI | Implemented |
-| Persist AI extraction snapshot | Implemented |
-| Persist human review decisions | Implemented |
-| Resolved reviewed inquiry boundary | Implemented |
-| Deterministic pricing engine | Implemented |
-| Review-ready proposal draft | Implemented |
-| MCP proposal tools | Implemented |
+| PostgreSQL integration tests         | Implemented |
+| Playwright browser E2E               | Implemented |
+| GitHub Actions CI                    | Implemented |
+| AI extraction in browser UI          | Implemented |
+| Human review UI                      | Implemented |
+| Persist AI extraction snapshot       | Implemented |
+| Persist human review decisions       | Implemented |
+| Resolved reviewed inquiry boundary   | Implemented |
+| Deterministic pricing engine         | Implemented |
+| Review-ready proposal draft          | Implemented |
+| MCP proposal tools                   | Implemented |
 
 The persisted browser flow and guarded AI extraction flow are now composed on
 the inquiry detail page. AI extraction runs only when the user explicitly

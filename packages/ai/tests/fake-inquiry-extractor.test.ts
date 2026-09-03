@@ -1,13 +1,7 @@
 import type { InquiryExtraction } from "@proposal-agent/domain";
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  FakeInquiryExtractor,
-} from "../src/index";
+import { FakeInquiryExtractor } from "../src/index";
 
 function createExtraction(): InquiryExtraction {
   return {
@@ -56,26 +50,19 @@ describe("FakeInquiryExtractor", () => {
   it("returns the configured extraction", async () => {
     const extraction = createExtraction();
 
-    const extractor =
-      new FakeInquiryExtractor(extraction);
+    const extractor = new FakeInquiryExtractor(extraction);
 
-    const result = await extractor.extract(
-      "Company offsite inquiry",
-    );
+    const result = await extractor.extract("Company offsite inquiry");
 
     expect(result).toBe(extraction);
   });
 
   it("records received inquiry text", async () => {
-    const extractor =
-      new FakeInquiryExtractor(createExtraction());
+    const extractor = new FakeInquiryExtractor(createExtraction());
 
     await extractor.extract("First inquiry");
     await extractor.extract("Second inquiry");
 
-    expect(extractor.inputs).toEqual([
-      "First inquiry",
-      "Second inquiry",
-    ]);
+    expect(extractor.inputs).toEqual(["First inquiry", "Second inquiry"]);
   });
 });

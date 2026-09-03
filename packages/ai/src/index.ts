@@ -1,6 +1,4 @@
-export {
-  FakeInquiryExtractor,
-} from "./fake-inquiry-extractor";
+export { FakeInquiryExtractor } from "./fake-inquiry-extractor";
 
 export {
   OpenAIInquiryExtractor,
@@ -12,6 +10,4 @@ export {
   type ModelInquiryExtraction,
 } from "./openai/model-inquiry-extraction";
 
-export {
-  toInquiryExtraction,
-} from "./openai/to-inquiry-extraction";
+export { toInquiryExtraction } from "./openai/to-inquiry-extraction";

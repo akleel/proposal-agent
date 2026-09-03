@@ -1,32 +1,19 @@
 "use client";
 
-import type {
-  CatalogSelection,
-} from "@proposal-agent/domain";
-import {
-  useActionState,
-} from "react";
-import {
-  useFormStatus,
-} from "react-dom";
+import type { CatalogSelection } from "@proposal-agent/domain";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
-import {
-  createProposalDraftAction,
-} from "./proposal-actions";
-import {
-  initialProposalDraftActionState,
-} from "./proposal-draft-types";
+import { createProposalDraftAction } from "./proposal-actions";
+import { initialProposalDraftActionState } from "./proposal-draft-types";
 
 interface CreateProposalDraftFormProps {
   readonly inquiryId: string;
-  readonly selections:
-    readonly CatalogSelection[];
+  readonly selections: readonly CatalogSelection[];
 }
 
 function CreateDraftSubmitButton() {
-  const {
-    pending,
-  } = useFormStatus();
+  const { pending } = useFormStatus();
 
   return (
     <button
@@ -35,21 +22,13 @@ function CreateDraftSubmitButton() {
       disabled={pending}
       className="inline-flex min-h-11 items-center justify-center rounded-xl bg-zinc-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending
-        ? "Creating draft..."
-        : "Create review-ready draft"}
+      {pending ? "Creating draft..." : "Create review-ready draft"}
     </button>
   );
 }
 
-export function CreateProposalDraftForm({
-  inquiryId,
-  selections,
-}: CreateProposalDraftFormProps) {
-  const [
-    state,
-    formAction,
-  ] = useActionState(
+export function CreateProposalDraftForm({ inquiryId, selections }: CreateProposalDraftFormProps) {
+  const [state, formAction] = useActionState(
     createProposalDraftAction,
     initialProposalDraftActionState,
   );
@@ -63,50 +42,26 @@ export function CreateProposalDraftForm({
           </p>
 
           <p className="mt-1 text-xs leading-5 text-zinc-500">
-            Draft creation recalculates
-            pricing server-side from the
-            reviewed inquiry and authoritative
-            catalog, then stores the resulting
-            snapshot. The draft is not approved
-            and is not sent.
+            Draft creation recalculates pricing server-side from the reviewed inquiry and
+            authoritative catalog, then stores the resulting snapshot. The draft is not approved and
+            is not sent.
           </p>
         </div>
 
-        <form
-          action={formAction}
-          className="shrink-0"
-        >
-          <input
-            type="hidden"
-            name="inquiryId"
-            value={inquiryId}
-          />
+        <form action={formAction} className="shrink-0">
+          <input type="hidden" name="inquiryId" value={inquiryId} />
 
-          {selections.map(
-            (selection) => (
-              <span
-                key={
-                  selection.catalogItemId
-                }
-              >
-                <input
-                  type="hidden"
-                  name="catalogItemId"
-                  value={
-                    selection.catalogItemId
-                  }
-                />
+          {selections.map((selection) => (
+            <span key={selection.catalogItemId}>
+              <input type="hidden" name="catalogItemId" value={selection.catalogItemId} />
 
-                <input
-                  type="hidden"
-                  name={`occurrences:${selection.catalogItemId}`}
-                  value={
-                    selection.occurrences
-                  }
-                />
-              </span>
-            ),
-          )}
+              <input
+                type="hidden"
+                name={`occurrences:${selection.catalogItemId}`}
+                value={selection.occurrences}
+              />
+            </span>
+          ))}
 
           <CreateDraftSubmitButton />
         </form>
