@@ -23,6 +23,43 @@ const catalogItemIds = [
   "late_checkout_room",
 ] as const;
 
+const proposalApiSelections = [
+  {
+    catalogItemId: "hotel_room_night",
+    occurrences: 1,
+  },
+  {
+    catalogItemId: "meeting_room_day",
+    occurrences: 2,
+  },
+  {
+    catalogItemId: "breakfast_person",
+    occurrences: 2,
+  },
+  {
+    catalogItemId: "dinner_person",
+    occurrences: 1,
+  },
+  {
+    catalogItemId: "late_checkout_room",
+    occurrences: 1,
+  },
+] as const;
+
+interface ProposalApiResponse {
+  readonly proposal: {
+    readonly id: string;
+    readonly inquiryId: string;
+    readonly status: "draft";
+    readonly catalogVersion: string;
+    readonly createdAt: string;
+    readonly pricing: {
+      readonly currency: "SEK";
+      readonly totalMinor: number;
+    };
+  };
+}
+
 function createDeterministicExtraction(): InquiryExtraction {
   return {
     guests: {
@@ -247,6 +284,8 @@ test("creates and reloads a persisted review-ready proposal draft", async ({ pag
 
   let proposalId: string | null = null;
 
+  let apiProposalId: string | null = null;
+
   try {
     inquiryId = await createInquiry(page);
 
@@ -261,6 +300,38 @@ test("creates and reloads a persisted review-ready proposal draft", async ({ pag
     ).toBeVisible();
 
     await resolveInquiryReview(page);
+
+    const createApiResponse = await page.request.post("/api/proposals", {
+      data: {
+        inquiryId,
+        selections: proposalApiSelections,
+      },
+    });
+
+    expect(createApiResponse.status()).toBe(201);
+
+    const createApiBody = (await createApiResponse.json()) as ProposalApiResponse;
+
+    apiProposalId = createApiBody.proposal.id;
+
+    expect(createApiBody.proposal.inquiryId).toBe(inquiryId);
+    expect(createApiBody.proposal.status).toBe("draft");
+    expect(createApiBody.proposal.catalogVersion).toBe("2026-08-demo-v1");
+    expect(createApiBody.proposal.pricing.currency).toBe("SEK");
+    expect(createApiBody.proposal.pricing.totalMinor).toBe(6_120_000);
+    expect(Number.isNaN(Date.parse(createApiBody.proposal.createdAt))).toBe(false);
+
+    expect(createApiResponse.headers()["location"]).toBe(`/api/proposals/${apiProposalId}`);
+
+    const getApiResponse = await page.request.get(`/api/proposals/${apiProposalId}`);
+
+    expect(getApiResponse.status()).toBe(200);
+
+    const getApiBody = (await getApiResponse.json()) as ProposalApiResponse;
+
+    expect(getApiBody.proposal.id).toBe(apiProposalId);
+    expect(getApiBody.proposal.inquiryId).toBe(inquiryId);
+    expect(getApiBody.proposal.pricing.totalMinor).toBe(6_120_000);
 
     await selectPricing(page);
 
@@ -303,6 +374,10 @@ test("creates and reloads a persisted review-ready proposal draft", async ({ pag
   } finally {
     if (proposalId) {
       await deleteProposalDraftById(proposalId);
+    }
+
+    if (apiProposalId) {
+      await deleteProposalDraftById(apiProposalId);
     }
 
     if (inquiryId) {
