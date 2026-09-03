@@ -6,6 +6,7 @@ export {
 
 export {
   extractedInquirySchema,
+  isoDateSchema,
   reviewableFieldSchema,
   type ExtractedInquiryContract,
 } from "./inquiry";

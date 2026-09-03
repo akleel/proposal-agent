@@ -96,6 +96,33 @@ function toReviewableField<T>(
   };
 }
 
+function toBudgetField(
+  rawText: string,
+  field: ModelField<number | null>,
+): ReviewableField<number | null> {
+  const candidate = toReviewableField(
+    rawText,
+    field,
+  );
+
+  const hasExplicitSek =
+    candidate.source !== null &&
+    /\bSEK\b/i.test(candidate.source);
+
+  if (
+    candidate.value !== null &&
+    !hasExplicitSek
+  ) {
+    return {
+      ...candidate,
+      value: null,
+      requiresReview: true,
+    };
+  }
+
+  return candidate;
+}
+
 export function toInquiryExtraction(
   rawText: string,
   modelExtraction: ModelInquiryExtraction,
@@ -117,7 +144,7 @@ export function toInquiryExtraction(
       rawText,
       modelExtraction.endDate,
     ),
-    budgetCents: toReviewableField(
+    budgetCents: toBudgetField(
       rawText,
       modelExtraction.budgetCents,
     ),

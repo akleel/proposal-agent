@@ -1,3 +1,6 @@
+import {
+  isoDateToUtcDay,
+} from "./iso-date";
 import type {
   ResolvedInquiry,
 } from "./resolved-inquiry";
@@ -80,9 +83,6 @@ export class PricingError extends Error {
   }
 }
 
-const millisecondsPerDay =
-  24 * 60 * 60 * 1000;
-
 const pricingBases =
   new Set<string>([
     "per_person",
@@ -143,48 +143,16 @@ function safeAdd(
 function parseIsoDateToUtcDay(
   value: string,
 ): number {
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})$/.exec(
-      value,
-    );
+  const day = isoDateToUtcDay(value);
 
-  if (!match) {
+  if (day === null) {
     throw new PricingError(
       "INVALID_DATE_RANGE",
-      `Invalid ISO date: ${value}.`,
+      `Invalid ISO calendar date: ${value}.`,
     );
   }
 
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-
-  const milliseconds =
-    Date.UTC(
-      year,
-      month - 1,
-      day,
-    );
-
-  const date =
-    new Date(milliseconds);
-
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !==
-      month - 1 ||
-    date.getUTCDate() !== day
-  ) {
-    throw new PricingError(
-      "INVALID_DATE_RANGE",
-      `Invalid calendar date: ${value}.`,
-    );
-  }
-
-  return Math.trunc(
-    milliseconds /
-      millisecondsPerDay,
-  );
+  return day;
 }
 
 function calculateNights(

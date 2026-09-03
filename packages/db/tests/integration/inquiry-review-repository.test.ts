@@ -238,5 +238,60 @@ describe(
         ).toEqual([]);
       },
     );
+
+    it(
+      "rejects malformed persisted extraction JSON",
+      async () => {
+        const inquiry = {
+          id:
+            "3ac7f2de-7430-47d6-b63f-9c899eafd248",
+          rawText:
+            "Malformed extraction boundary test.",
+          createdAt:
+            new Date(
+              "2026-08-25T08:00:00.000Z",
+            ),
+        };
+
+        await inquiryRepository.create(
+          inquiry,
+        );
+
+        const extraction =
+          createExtraction();
+
+        await pool.query(
+          `
+            INSERT INTO inquiry_extractions (
+              inquiry_id,
+              extraction,
+              extracted_at
+            )
+            VALUES ($1, $2::jsonb, $3)
+          `,
+          [
+            inquiry.id,
+            JSON.stringify({
+              ...extraction,
+              guests: {
+                ...extraction.guests,
+                confidence: "invalid",
+              },
+            }),
+            new Date(
+              "2026-08-25T08:01:00.000Z",
+            ),
+          ],
+        );
+
+        await expect(
+          reviewRepository.findByInquiryId(
+            inquiry.id,
+          ),
+        ).rejects.toThrow(
+          "Persisted inquiry extraction is invalid.",
+        );
+      },
+    );
   },
 );
