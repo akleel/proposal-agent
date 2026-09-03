@@ -1,18 +1,10 @@
-import type {
-  InquiryExtractor,
-} from "@proposal-agent/application";
-import type {
-  InquiryExtraction,
-} from "@proposal-agent/domain";
+import type { InquiryExtractor } from "@proposal-agent/application";
+import type { InquiryExtraction } from "@proposal-agent/domain";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 
-import {
-  modelInquiryExtractionSchema,
-} from "./model-inquiry-extraction";
-import {
-  toInquiryExtraction,
-} from "./to-inquiry-extraction";
+import { modelInquiryExtractionSchema } from "./model-inquiry-extraction";
+import { toInquiryExtraction } from "./to-inquiry-extraction";
 
 const DEFAULT_MODEL = "gpt-5.4-mini";
 
@@ -61,37 +53,25 @@ export interface OpenAIInquiryExtractorOptions {
   readonly model?: string;
 }
 
-export class OpenAIInquiryExtractor
-  implements InquiryExtractor
-{
+export class OpenAIInquiryExtractor implements InquiryExtractor {
   private readonly client: OpenAI;
   private readonly model: string;
 
-  public constructor(
-    options: OpenAIInquiryExtractorOptions = {},
-  ) {
+  public constructor(options: OpenAIInquiryExtractorOptions = {}) {
     this.client = new OpenAI({
       apiKey: options.apiKey,
     });
 
-    this.model =
-      options.model ??
-      process.env.OPENAI_MODEL ??
-      DEFAULT_MODEL;
+    this.model = options.model ?? process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
   }
 
-  public async extract(
-    rawText: string,
-  ): Promise<InquiryExtraction> {
+  public async extract(rawText: string): Promise<InquiryExtraction> {
     const response = await this.client.responses.parse({
       model: this.model,
       instructions: EXTRACTION_INSTRUCTIONS,
       input: rawText,
       text: {
-        format: zodTextFormat(
-          modelInquiryExtractionSchema,
-          "inquiry_extraction",
-        ),
+        format: zodTextFormat(modelInquiryExtractionSchema, "inquiry_extraction"),
       },
     });
 
@@ -101,9 +81,6 @@ export class OpenAIInquiryExtractor
       );
     }
 
-    return toInquiryExtraction(
-      rawText,
-      response.output_parsed,
-    );
+    return toInquiryExtraction(rawText, response.output_parsed);
   }
 }

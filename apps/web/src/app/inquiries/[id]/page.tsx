@@ -1,10 +1,6 @@
-import {
-  inquiryIdSchema,
-} from "@proposal-agent/contracts";
+import { inquiryIdSchema } from "@proposal-agent/contracts";
 import Link from "next/link";
-import {
-  notFound,
-} from "next/navigation";
+import { notFound } from "next/navigation";
 
 import {
   getCurrentPricingCatalogUseCase,
@@ -12,15 +8,9 @@ import {
   getPersistedInquiryReviewUseCase,
 } from "@/lib/server/inquiries";
 
-import {
-  ExtractionPanel,
-} from "./extraction-panel";
-import {
-  PricingPanel,
-} from "./pricing-panel";
-import {
-  serializeInquiryReview,
-} from "./types";
+import { ExtractionPanel } from "./extraction-panel";
+import { PricingPanel } from "./pricing-panel";
+import { serializeInquiryReview } from "./types";
 
 interface InquiryPageProps {
   readonly params: Promise<{
@@ -28,34 +18,20 @@ interface InquiryPageProps {
   }>;
 }
 
-export const dynamic =
-  "force-dynamic";
+export const dynamic = "force-dynamic";
 
-export default async function InquiryPage({
-  params,
-}: InquiryPageProps) {
-  const {
-    id,
-  } = await params;
+export default async function InquiryPage({ params }: InquiryPageProps) {
+  const { id } = await params;
 
-  const parsedId =
-    inquiryIdSchema.safeParse(id);
+  const parsedId = inquiryIdSchema.safeParse(id);
 
   if (!parsedId.success) {
     notFound();
   }
 
-  const [
-    inquiry,
-    review,
-    catalog,
-  ] = await Promise.all([
-    getInquiryUseCase(
-      parsedId.data,
-    ),
-    getPersistedInquiryReviewUseCase(
-      parsedId.data,
-    ),
+  const [inquiry, review, catalog] = await Promise.all([
+    getInquiryUseCase(parsedId.data),
+    getPersistedInquiryReviewUseCase(parsedId.data),
     getCurrentPricingCatalogUseCase(),
   ]);
 
@@ -63,25 +39,20 @@ export default async function InquiryPage({
     notFound();
   }
 
-  const pricingContextKey =
-    review
-      ? [
-          review.extractedAt.toISOString(),
-          ...review.decisions.map(
-            (decision) =>
-              `${decision.field}:${decision.reviewedAt.toISOString()}`,
-          ),
-        ].join("|")
-      : "not-extracted";
+  const pricingContextKey = review
+    ? [
+        review.extractedAt.toISOString(),
+        ...review.decisions.map(
+          (decision) => `${decision.field}:${decision.reviewedAt.toISOString()}`,
+        ),
+      ].join("|")
+    : "not-extracted";
 
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <Link
-            href="/"
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-950"
-          >
+          <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-950">
             ← Proposal Agent
           </Link>
 
@@ -105,9 +76,8 @@ export default async function InquiryPage({
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-zinc-600">
-                The original customer text remains the durable
-                source. AI interpretation and human review are
-                persisted separately below.
+                The original customer text remains the durable source. AI interpretation and human
+                review are persisted separately below.
               </p>
             </div>
 
@@ -117,9 +87,7 @@ export default async function InquiryPage({
                   Inquiry ID
                 </dt>
 
-                <dd className="mt-1 break-all text-sm font-medium text-zinc-900">
-                  {inquiry.id}
-                </dd>
+                <dd className="mt-1 break-all text-sm font-medium text-zinc-900">{inquiry.id}</dd>
               </div>
 
               <div>
@@ -134,9 +102,7 @@ export default async function InquiryPage({
             </dl>
 
             <div className="mt-6">
-              <h2 className="text-sm font-semibold text-zinc-950">
-                Original customer text
-              </h2>
+              <h2 className="text-sm font-semibold text-zinc-950">Original customer text</h2>
 
               <p className="mt-3 whitespace-pre-wrap rounded-xl border border-zinc-200 bg-zinc-50 p-5 text-sm leading-7 text-zinc-800">
                 {inquiry.rawText}
@@ -146,23 +112,14 @@ export default async function InquiryPage({
 
           <ExtractionPanel
             inquiryId={inquiry.id}
-            initialResult={
-              review
-                ? serializeInquiryReview(
-                    review,
-                  )
-                : null
-            }
+            initialResult={review ? serializeInquiryReview(review) : null}
           />
 
           <PricingPanel
             key={pricingContextKey}
             inquiryId={inquiry.id}
             catalog={catalog}
-            resolvedInquiry={
-              review?.resolvedInquiry ??
-              null
-            }
+            resolvedInquiry={review?.resolvedInquiry ?? null}
           />
         </div>
       </div>

@@ -23,10 +23,7 @@ export {
   type CalculateInquiryPricingInputContract,
 } from "./pricing-selection";
 
-export {
-  proposalDraftIdSchema,
-  type ProposalDraftIdContract,
-} from "./proposal-draft";
+export { proposalDraftIdSchema, type ProposalDraftIdContract } from "./proposal-draft";
 
 export {
   mcpCalculatePricingInputSchema,

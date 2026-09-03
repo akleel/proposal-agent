@@ -1,17 +1,9 @@
-import type {
-  InquiryExtraction,
-} from "./inquiry";
-import {
-  isValidIsoDate,
-} from "./iso-date";
+import type { InquiryExtraction } from "./inquiry";
+import { isValidIsoDate } from "./iso-date";
 
-export type InquiryReviewDecisionKind =
-  | "accepted"
-  | "corrected";
+export type InquiryReviewDecisionKind = "accepted" | "corrected";
 
-export type InquiryReviewResolvedValue =
-  | string
-  | number;
+export type InquiryReviewResolvedValue = string | number;
 
 export interface InquiryReviewDecision {
   readonly field: string;
@@ -38,10 +30,7 @@ export class InquiryReviewDecisionError extends Error {
   }
 }
 
-function getReviewCandidate(
-  extraction: InquiryExtraction,
-  field: string,
-): ReviewCandidate | null {
+function getReviewCandidate(extraction: InquiryExtraction, field: string): ReviewCandidate | null {
   switch (field) {
     case "guests":
       return extraction.guests;
@@ -57,8 +46,7 @@ function getReviewCandidate(
       break;
   }
 
-  const requirementMatch =
-    /^requirements\.(\d+)$/.exec(field);
+  const requirementMatch = /^requirements\.(\d+)$/.exec(field);
 
   if (!requirementMatch) {
     return null;
@@ -83,20 +71,13 @@ function parseInteger(
   const trimmed = value.trim();
 
   if (!/^\d+$/.test(trimmed)) {
-    throw new InquiryReviewDecisionError(
-      `${options.label} must be a whole number.`,
-    );
+    throw new InquiryReviewDecisionError(`${options.label} must be a whole number.`);
   }
 
   const parsed = Number(trimmed);
 
-  if (
-    !Number.isSafeInteger(parsed) ||
-    parsed < options.minimum
-  ) {
-    throw new InquiryReviewDecisionError(
-      `${options.label} must be at least ${options.minimum}.`,
-    );
+  if (!Number.isSafeInteger(parsed) || parsed < options.minimum) {
+    throw new InquiryReviewDecisionError(`${options.label} must be at least ${options.minimum}.`);
   }
 
   return parsed;
@@ -106,44 +87,31 @@ function parseIsoDate(value: string): string {
   const trimmed = value.trim();
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    throw new InquiryReviewDecisionError(
-      "Date must use YYYY-MM-DD.",
-    );
+    throw new InquiryReviewDecisionError("Date must use YYYY-MM-DD.");
   }
 
   if (!isValidIsoDate(trimmed)) {
-    throw new InquiryReviewDecisionError(
-      "Date must be a valid calendar date.",
-    );
+    throw new InquiryReviewDecisionError("Date must be a valid calendar date.");
   }
 
   return trimmed;
 }
 
-function parseRequirement(
-  value: string,
-): string {
+function parseRequirement(value: string): string {
   const trimmed = value.trim();
 
   if (!trimmed) {
-    throw new InquiryReviewDecisionError(
-      "Requirement must not be empty.",
-    );
+    throw new InquiryReviewDecisionError("Requirement must not be empty.");
   }
 
   if (trimmed.length > 1_000) {
-    throw new InquiryReviewDecisionError(
-      "Requirement must not exceed 1,000 characters.",
-    );
+    throw new InquiryReviewDecisionError("Requirement must not exceed 1,000 characters.");
   }
 
   return trimmed;
 }
 
-function parseCorrectedValue(
-  field: string,
-  correctedValue: string,
-): InquiryReviewResolvedValue {
+function parseCorrectedValue(field: string, correctedValue: string): InquiryReviewResolvedValue {
   switch (field) {
     case "guests":
       return parseInteger(correctedValue, {
@@ -175,9 +143,7 @@ function parseCorrectedValue(
     return parseRequirement(correctedValue);
   }
 
-  throw new InquiryReviewDecisionError(
-    "Unknown review field.",
-  );
+  throw new InquiryReviewDecisionError("Unknown review field.");
 }
 
 export function createInquiryReviewDecision(
@@ -185,21 +151,14 @@ export function createInquiryReviewDecision(
   input: CreateInquiryReviewDecisionInput,
   reviewedAt: Date,
 ): InquiryReviewDecision {
-  const candidate = getReviewCandidate(
-    extraction,
-    input.field,
-  );
+  const candidate = getReviewCandidate(extraction, input.field);
 
   if (!candidate) {
-    throw new InquiryReviewDecisionError(
-      "Unknown review field.",
-    );
+    throw new InquiryReviewDecisionError("Unknown review field.");
   }
 
   if (!candidate.requiresReview) {
-    throw new InquiryReviewDecisionError(
-      "This field does not require human review.",
-    );
+    throw new InquiryReviewDecisionError("This field does not require human review.");
   }
 
   if (input.kind === "accepted") {
@@ -220,10 +179,7 @@ export function createInquiryReviewDecision(
   return {
     field: input.field,
     kind: "corrected",
-    resolvedValue: parseCorrectedValue(
-      input.field,
-      input.correctedValue ?? "",
-    ),
+    resolvedValue: parseCorrectedValue(input.field, input.correctedValue ?? ""),
     reviewedAt,
   };
 }

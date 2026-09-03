@@ -10,6 +10,4 @@ export const createInquiryInputSchema = z.object({
     .max(20_000, "Inquiry must not exceed 20,000 characters."),
 });
 
-export type CreateInquiryInputContract = z.infer<
-  typeof createInquiryInputSchema
->;
+export type CreateInquiryInputContract = z.infer<typeof createInquiryInputSchema>;

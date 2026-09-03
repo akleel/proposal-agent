@@ -1,12 +1,8 @@
 import "server-only";
 
-import {
-  randomUUID,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
 
-import {
-  OpenAIInquiryExtractor,
-} from "@proposal-agent/ai";
+import { OpenAIInquiryExtractor } from "@proposal-agent/ai";
 import {
   calculateInquiryPricing,
   createInquiry,
@@ -15,52 +11,32 @@ import {
   getInquiryReview,
   saveInquiryReviewDecision,
 } from "@proposal-agent/application";
-import {
-  PostgresInquiryRepository,
-  PostgresInquiryReviewRepository,
-} from "@proposal-agent/db";
-import type {
-  CatalogSelection,
-  InquiryReviewDecisionKind,
-} from "@proposal-agent/domain";
+import { PostgresInquiryRepository, PostgresInquiryReviewRepository } from "@proposal-agent/db";
+import type { CatalogSelection, InquiryReviewDecisionKind } from "@proposal-agent/domain";
 
-import {
-  StaticCatalogProvider,
-} from "@proposal-agent/catalog";
-import {
-  getDatabasePool,
-} from "./database";
+import { StaticCatalogProvider } from "@proposal-agent/catalog";
+import { getDatabasePool } from "./database";
 
 function createInquiryRepository() {
-  return new PostgresInquiryRepository(
-    getDatabasePool(),
-  );
+  return new PostgresInquiryRepository(getDatabasePool());
 }
 
 function createInquiryReviewRepository() {
-  return new PostgresInquiryReviewRepository(
-    getDatabasePool(),
-  );
+  return new PostgresInquiryReviewRepository(getDatabasePool());
 }
 
-function createCatalogProvider():
-  StaticCatalogProvider {
+function createCatalogProvider(): StaticCatalogProvider {
   return new StaticCatalogProvider();
 }
 
-function createInquiryExtractor():
-  OpenAIInquiryExtractor {
-  const apiKey =
-    process.env.OPENAI_API_KEY;
+function createInquiryExtractor(): OpenAIInquiryExtractor {
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error(
-      "Missing OPENAI_API_KEY for server-side inquiry extraction.",
-    );
+    throw new Error("Missing OPENAI_API_KEY for server-side inquiry extraction.");
   }
 
-  const model =
-    process.env.OPENAI_MODEL;
+  const model = process.env.OPENAI_MODEL;
 
   if (model) {
     return new OpenAIInquiryExtractor({
@@ -74,13 +50,10 @@ function createInquiryExtractor():
   });
 }
 
-export async function createInquiryUseCase(
-  rawText: string,
-) {
+export async function createInquiryUseCase(rawText: string) {
   return createInquiry(
     {
-      repository:
-        createInquiryRepository(),
+      repository: createInquiryRepository(),
       generateId: randomUUID,
       now: () => new Date(),
     },
@@ -90,63 +63,48 @@ export async function createInquiryUseCase(
   );
 }
 
-export async function getInquiryUseCase(
-  id: string,
-) {
+export async function getInquiryUseCase(id: string) {
   return getInquiry(
     {
-      repository:
-        createInquiryRepository(),
+      repository: createInquiryRepository(),
     },
     id,
   );
 }
 
-export async function extractPersistedInquiryUseCase(
-  id: string,
-) {
+export async function extractPersistedInquiryUseCase(id: string) {
   return extractInquiryReview(
     {
-      inquiryRepository:
-        createInquiryRepository(),
-      reviewRepository:
-        createInquiryReviewRepository(),
-      extractor:
-        createInquiryExtractor(),
+      inquiryRepository: createInquiryRepository(),
+      reviewRepository: createInquiryReviewRepository(),
+      extractor: createInquiryExtractor(),
       now: () => new Date(),
     },
     id,
   );
 }
 
-export async function getPersistedInquiryReviewUseCase(
-  id: string,
-) {
+export async function getPersistedInquiryReviewUseCase(id: string) {
   return getInquiryReview(
     {
-      reviewRepository:
-        createInquiryReviewRepository(),
+      reviewRepository: createInquiryReviewRepository(),
     },
     id,
   );
 }
 
 export async function getCurrentPricingCatalogUseCase() {
-  return createCatalogProvider()
-    .getCurrentCatalog();
+  return createCatalogProvider().getCurrentCatalog();
 }
 
 export async function calculatePersistedInquiryPricingUseCase(
   inquiryId: string,
-  selections:
-    readonly CatalogSelection[],
+  selections: readonly CatalogSelection[],
 ) {
   return calculateInquiryPricing(
     {
-      reviewRepository:
-        createInquiryReviewRepository(),
-      catalogProvider:
-        createCatalogProvider(),
+      reviewRepository: createInquiryReviewRepository(),
+      catalogProvider: createCatalogProvider(),
     },
     {
       inquiryId,
@@ -163,13 +121,11 @@ export interface SavePersistedInquiryReviewDecisionInput {
 }
 
 export async function savePersistedInquiryReviewDecisionUseCase(
-  input:
-    SavePersistedInquiryReviewDecisionInput,
+  input: SavePersistedInquiryReviewDecisionInput,
 ) {
   return saveInquiryReviewDecision(
     {
-      reviewRepository:
-        createInquiryReviewRepository(),
+      reviewRepository: createInquiryReviewRepository(),
       now: () => new Date(),
     },
     input,

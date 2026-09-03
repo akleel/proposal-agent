@@ -1,13 +1,6 @@
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  getReviewIssues,
-  type InquiryExtraction,
-} from "../src/index";
+import { getReviewIssues, type InquiryExtraction } from "../src/index";
 
 describe("review issues with absent evidence", () => {
   it("preserves null source for a missing field", () => {

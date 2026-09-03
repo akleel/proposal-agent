@@ -1,24 +1,11 @@
 import { fileURLToPath } from "node:url";
 
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  createDatabasePool,
-  PostgresInquiryRepository,
-  runMigrations,
-} from "../../src/index";
+import { createDatabasePool, PostgresInquiryRepository, runMigrations } from "../../src/index";
 import { requireEnv } from "../../src/env";
 
-const migrationsDirectory = fileURLToPath(
-  new URL("../../migrations/", import.meta.url),
-);
+const migrationsDirectory = fileURLToPath(new URL("../../migrations/", import.meta.url));
 
 const pool = createDatabasePool(requireEnv("TEST_DATABASE_URL"));
 const repository = new PostgresInquiryRepository(pool);
@@ -50,15 +37,11 @@ describe("PostgresInquiryRepository", () => {
     expect(persisted).not.toBeNull();
     expect(persisted?.id).toBe(inquiry.id);
     expect(persisted?.rawText).toBe(inquiry.rawText);
-    expect(persisted?.createdAt.toISOString()).toBe(
-      inquiry.createdAt.toISOString(),
-    );
+    expect(persisted?.createdAt.toISOString()).toBe(inquiry.createdAt.toISOString());
   });
 
   it("returns null for an unknown inquiry", async () => {
-    const result = await repository.findById(
-      "87be958b-8903-4bbd-a48b-0c19d57af064",
-    );
+    const result = await repository.findById("87be958b-8903-4bbd-a48b-0c19d57af064");
 
     expect(result).toBeNull();
   });

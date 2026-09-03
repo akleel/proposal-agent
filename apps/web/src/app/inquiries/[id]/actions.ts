@@ -1,21 +1,14 @@
 "use server";
 
-import {
-  consumeDemoAiRateLimit,
-} from "@/lib/server/demo-rate-limit";
+import { consumeDemoAiRateLimit } from "@/lib/server/demo-rate-limit";
 
 import {
   calculateInquiryPricingInputSchema,
   inquiryIdSchema,
   saveInquiryReviewDecisionInputSchema,
 } from "@proposal-agent/contracts";
-import {
-  InquiryReviewDecisionError,
-  PricingError,
-} from "@proposal-agent/domain";
-import {
-  revalidatePath,
-} from "next/cache";
+import { InquiryReviewDecisionError, PricingError } from "@proposal-agent/domain";
+import { revalidatePath } from "next/cache";
 
 import {
   calculatePersistedInquiryPricingUseCase,
@@ -24,18 +17,12 @@ import {
   savePersistedInquiryReviewDecisionUseCase,
 } from "@/lib/server/inquiries";
 
-import {
-  type PricingActionState,
-} from "./pricing-types";
-import {
-  serializeInquiryReview,
-  type InquiryReviewActionState,
-} from "./types";
+import { type PricingActionState } from "./pricing-types";
+import { serializeInquiryReview, type InquiryReviewActionState } from "./types";
 
 function errorState(
   message: string,
-  result:
-    InquiryReviewActionState["result"] = null,
+  result: InquiryReviewActionState["result"] = null,
 ): InquiryReviewActionState {
   return {
     status: "error",
@@ -44,9 +31,7 @@ function errorState(
   };
 }
 
-function pricingErrorState(
-  message: string,
-): PricingActionState {
+function pricingErrorState(message: string): PricingActionState {
   return {
     status: "error",
     message,
@@ -55,9 +40,7 @@ function pricingErrorState(
   };
 }
 
-function pricingErrorMessage(
-  error: PricingError,
-): string {
+function pricingErrorMessage(error: PricingError): string {
   switch (error.code) {
     case "EMPTY_SELECTIONS":
       return "Select at least one catalog item.";
@@ -87,41 +70,26 @@ function pricingErrorMessage(
 }
 
 export async function inquiryReviewWorkflowAction(
-  previousState:
-    InquiryReviewActionState,
+  previousState: InquiryReviewActionState,
   formData: FormData,
 ): Promise<InquiryReviewActionState> {
-  const operation =
-    formData.get("operation");
+  const operation = formData.get("operation");
 
-  const parsedId =
-    inquiryIdSchema.safeParse(
-      formData.get("inquiryId"),
-    );
+  const parsedId = inquiryIdSchema.safeParse(formData.get("inquiryId"));
 
   if (!parsedId.success) {
-    return errorState(
-      "The inquiry identifier is invalid.",
-      previousState.result,
-    );
+    return errorState("The inquiry identifier is invalid.", previousState.result);
   }
 
   if (operation === "extract") {
     try {
-      const inquiry =
-        await getInquiryUseCase(
-          parsedId.data,
-        );
+      const inquiry = await getInquiryUseCase(parsedId.data);
 
       if (!inquiry) {
-        return errorState(
-          "The inquiry could not be found.",
-          previousState.result,
-        );
+        return errorState("The inquiry could not be found.", previousState.result);
       }
 
-      const rateLimit =
-        await consumeDemoAiRateLimit();
+      const rateLimit = await consumeDemoAiRateLimit();
 
       if (!rateLimit.allowed) {
         return errorState(
@@ -130,24 +98,15 @@ export async function inquiryReviewWorkflowAction(
         );
       }
 
-      const review =
-        await extractPersistedInquiryUseCase(
-          parsedId.data,
-        );
+      const review = await extractPersistedInquiryUseCase(parsedId.data);
 
       if (!review) {
-        return errorState(
-          "The inquiry could not be found.",
-          previousState.result,
-        );
+        return errorState("The inquiry could not be found.", previousState.result);
       }
 
-      revalidatePath(
-        `/inquiries/${parsedId.data}`,
-      );
+      revalidatePath(`/inquiries/${parsedId.data}`);
 
-      const result =
-        serializeInquiryReview(review);
+      const result = serializeInquiryReview(review);
 
       return {
         status: "success",
@@ -166,44 +125,26 @@ export async function inquiryReviewWorkflowAction(
   }
 
   if (operation !== "review") {
-    return errorState(
-      "Unknown review operation.",
-      previousState.result,
-    );
+    return errorState("Unknown review operation.", previousState.result);
   }
 
-  const parsedDecision =
-    saveInquiryReviewDecisionInputSchema.safeParse({
-      inquiryId:
-        parsedId.data,
-      field:
-        formData.get("field"),
-      kind:
-        formData.get("kind"),
-      correctedValue:
-        formData.get("correctedValue") ??
-        "",
-    });
+  const parsedDecision = saveInquiryReviewDecisionInputSchema.safeParse({
+    inquiryId: parsedId.data,
+    field: formData.get("field"),
+    kind: formData.get("kind"),
+    correctedValue: formData.get("correctedValue") ?? "",
+  });
 
   if (!parsedDecision.success) {
-    return errorState(
-      "The review decision is invalid.",
-      previousState.result,
-    );
+    return errorState("The review decision is invalid.", previousState.result);
   }
 
   try {
-    const review =
-      await savePersistedInquiryReviewDecisionUseCase(
-        parsedDecision.data,
-      );
+    const review = await savePersistedInquiryReviewDecisionUseCase(parsedDecision.data);
 
-    revalidatePath(
-      `/inquiries/${parsedId.data}`,
-    );
+    revalidatePath(`/inquiries/${parsedId.data}`);
 
-    const result =
-      serializeInquiryReview(review);
+    const result = serializeInquiryReview(review);
 
     return {
       status: "success",
@@ -214,58 +155,33 @@ export async function inquiryReviewWorkflowAction(
       result,
     };
   } catch (error) {
-    if (
-      error instanceof
-      InquiryReviewDecisionError
-    ) {
-      return errorState(
-        error.message,
-        previousState.result,
-      );
+    if (error instanceof InquiryReviewDecisionError) {
+      return errorState(error.message, previousState.result);
     }
 
-    return errorState(
-      "The human review decision could not be saved.",
-      previousState.result,
-    );
+    return errorState("The human review decision could not be saved.", previousState.result);
   }
 }
 
 export async function calculateInquiryPricingAction(
-  _previousState:
-    PricingActionState,
+  _previousState: PricingActionState,
   formData: FormData,
 ): Promise<PricingActionState> {
-  const rawSelections =
-    formData.getAll(
-      "catalogItemId",
-    );
+  const rawSelections = formData.getAll("catalogItemId");
 
-  const selections =
-    rawSelections.map(
-      (catalogItemId) => {
-        const id =
-          typeof catalogItemId ===
-          "string"
-            ? catalogItemId
-            : "";
+  const selections = rawSelections.map((catalogItemId) => {
+    const id = typeof catalogItemId === "string" ? catalogItemId : "";
 
-        return {
-          catalogItemId,
-          occurrences:
-            formData.get(
-              `occurrences:${id}`,
-            ),
-        };
-      },
-    );
+    return {
+      catalogItemId,
+      occurrences: formData.get(`occurrences:${id}`),
+    };
+  });
 
-  const parsed =
-    calculateInquiryPricingInputSchema.safeParse({
-      inquiryId:
-        formData.get("inquiryId"),
-      selections,
-    });
+  const parsed = calculateInquiryPricingInputSchema.safeParse({
+    inquiryId: formData.get("inquiryId"),
+    selections,
+  });
 
   if (!parsed.success) {
     return pricingErrorState(
@@ -274,25 +190,16 @@ export async function calculateInquiryPricingAction(
   }
 
   try {
-    const result =
-      await calculatePersistedInquiryPricingUseCase(
-        parsed.data.inquiryId,
-        parsed.data.selections,
-      );
+    const result = await calculatePersistedInquiryPricingUseCase(
+      parsed.data.inquiryId,
+      parsed.data.selections,
+    );
 
-    if (
-      result.status ===
-      "not_extracted"
-    ) {
-      return pricingErrorState(
-        "Run and save inquiry extraction before calculating pricing.",
-      );
+    if (result.status === "not_extracted") {
+      return pricingErrorState("Run and save inquiry extraction before calculating pricing.");
     }
 
-    if (
-      result.status ===
-      "review_required"
-    ) {
+    if (result.status === "review_required") {
       return pricingErrorState(
         "Complete the deterministic human review before calculating pricing.",
       );
@@ -300,22 +207,15 @@ export async function calculateInquiryPricingAction(
 
     return {
       status: "success",
-      message:
-        `Pricing calculated deterministically from catalog ${result.pricing.catalogVersion}.`,
-      pricing:
-        result.pricing,
-      selections:
-        parsed.data.selections,
+      message: `Pricing calculated deterministically from catalog ${result.pricing.catalogVersion}.`,
+      pricing: result.pricing,
+      selections: parsed.data.selections,
     };
   } catch (error) {
     if (error instanceof PricingError) {
-      return pricingErrorState(
-        pricingErrorMessage(error),
-      );
+      return pricingErrorState(pricingErrorMessage(error));
     }
 
-    return pricingErrorState(
-      "Pricing could not be calculated. Please try again.",
-    );
+    return pricingErrorState("Pricing could not be calculated. Please try again.");
   }
 }

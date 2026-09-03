@@ -1,13 +1,7 @@
-import {
-  extractInquiry,
-} from "@proposal-agent/application";
-import {
-  getReviewIssues,
-} from "@proposal-agent/domain";
+import { extractInquiry } from "@proposal-agent/application";
+import { getReviewIssues } from "@proposal-agent/domain";
 
-import {
-  OpenAIInquiryExtractor,
-} from "../src/index";
+import { OpenAIInquiryExtractor } from "../src/index";
 
 const inquiry =
   process.argv.slice(2).join(" ").trim() ||
@@ -20,9 +14,7 @@ const inquiry =
   ].join(" ");
 
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error(
-    "OPENAI_API_KEY is not set in this terminal.",
-  );
+  throw new Error("OPENAI_API_KEY is not set in this terminal.");
 }
 
 const extractor = new OpenAIInquiryExtractor();
@@ -39,9 +31,7 @@ const extraction = await extractInquiry(
 console.log(
   JSON.stringify(
     {
-      model:
-        process.env.OPENAI_MODEL ??
-        "gpt-5.4-mini",
+      model: process.env.OPENAI_MODEL ?? "gpt-5.4-mini",
       inquiry,
       extraction,
       reviewIssues: getReviewIssues(extraction),

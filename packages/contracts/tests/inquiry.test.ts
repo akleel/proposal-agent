@@ -7,8 +7,18 @@ describe("extractedInquirySchema", () => {
     const result = extractedInquirySchema.safeParse({
       guests: { value: 65, confidence: 0.99, source: "65 people", requiresReview: false },
       rooms: { value: 45, confidence: 0.96, source: "45 rooms", requiresReview: false },
-      startDate: { value: "2026-10-12", confidence: 0.98, source: "October 12", requiresReview: false },
-      endDate: { value: "2026-10-14", confidence: 0.98, source: "October 14", requiresReview: false },
+      startDate: {
+        value: "2026-10-12",
+        confidence: 0.98,
+        source: "October 12",
+        requiresReview: false,
+      },
+      endDate: {
+        value: "2026-10-14",
+        confidence: 0.98,
+        source: "October 14",
+        requiresReview: false,
+      },
       budgetCents: { value: 2800000, confidence: 0.95, source: "SEK 28k", requiresReview: false },
       requirements: [],
     });
@@ -33,8 +43,18 @@ describe("extractedInquirySchema", () => {
     const result = extractedInquirySchema.safeParse({
       guests: { value: 65, confidence: 0.99, source: "65 people", requiresReview: false },
       rooms: { value: 45, confidence: 0.96, source: "45 rooms", requiresReview: false },
-      startDate: { value: "2026-02-30", confidence: 0.98, source: "2026-02-30", requiresReview: false },
-      endDate: { value: "2026-03-02", confidence: 0.98, source: "2026-03-02", requiresReview: false },
+      startDate: {
+        value: "2026-02-30",
+        confidence: 0.98,
+        source: "2026-02-30",
+        requiresReview: false,
+      },
+      endDate: {
+        value: "2026-03-02",
+        confidence: 0.98,
+        source: "2026-03-02",
+        requiresReview: false,
+      },
       budgetCents: { value: 2800000, confidence: 0.95, source: "SEK 28k", requiresReview: false },
       requirements: [],
     });
@@ -46,8 +66,18 @@ describe("extractedInquirySchema", () => {
     const result = extractedInquirySchema.safeParse({
       guests: { value: 65, confidence: 0.99, source: "65 people", requiresReview: false },
       rooms: { value: 45, confidence: 0.96, source: "45 rooms", requiresReview: false },
-      startDate: { value: "2026-10-12", confidence: 0.98, source: "2026-10-12", requiresReview: false },
-      endDate: { value: "2026-10-14", confidence: 0.98, source: "2026-10-14", requiresReview: false },
+      startDate: {
+        value: "2026-10-12",
+        confidence: 0.98,
+        source: "2026-10-12",
+        requiresReview: false,
+      },
+      endDate: {
+        value: "2026-10-14",
+        confidence: 0.98,
+        source: "2026-10-14",
+        requiresReview: false,
+      },
       budgetCents: { value: 2800000, confidence: 0.95, source: "EUR 28k", requiresReview: false },
       requirements: [],
     });

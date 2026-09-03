@@ -1,14 +1,7 @@
 import type { InquiryExtraction } from "@proposal-agent/domain";
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  extractInquiry,
-  type InquiryExtractor,
-} from "../src/index";
+import { extractInquiry, type InquiryExtractor } from "../src/index";
 
 function createExtraction(): InquiryExtraction {
   return {
@@ -56,13 +49,9 @@ function createExtraction(): InquiryExtraction {
 class RecordingInquiryExtractor implements InquiryExtractor {
   public readonly inputs: string[] = [];
 
-  public constructor(
-    private readonly result: InquiryExtraction,
-  ) {}
+  public constructor(private readonly result: InquiryExtraction) {}
 
-  public async extract(
-    rawText: string,
-  ): Promise<InquiryExtraction> {
+  public async extract(rawText: string): Promise<InquiryExtraction> {
     this.inputs.push(rawText);
 
     return this.result;
@@ -79,22 +68,17 @@ describe("extractInquiry", () => {
         extractor,
       },
       {
-        rawText:
-          "  We need 35 rooms for 65 people in Stockholm.  ",
+        rawText: "  We need 35 rooms for 65 people in Stockholm.  ",
       },
     );
 
-    expect(extractor.inputs).toEqual([
-      "We need 35 rooms for 65 people in Stockholm.",
-    ]);
+    expect(extractor.inputs).toEqual(["We need 35 rooms for 65 people in Stockholm."]);
 
     expect(result).toBe(extraction);
   });
 
   it("rejects blank input before invoking the extractor", async () => {
-    const extractor = new RecordingInquiryExtractor(
-      createExtraction(),
-    );
+    const extractor = new RecordingInquiryExtractor(createExtraction());
 
     await expect(
       extractInquiry(
@@ -105,9 +89,7 @@ describe("extractInquiry", () => {
           rawText: "   ",
         },
       ),
-    ).rejects.toThrow(
-      "Inquiry text cannot be empty.",
-    );
+    ).rejects.toThrow("Inquiry text cannot be empty.");
 
     expect(extractor.inputs).toEqual([]);
   });

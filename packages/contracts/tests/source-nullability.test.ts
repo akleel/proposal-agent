@@ -1,12 +1,6 @@
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 
-import {
-  extractedInquirySchema,
-} from "../src/index";
+import { extractedInquirySchema } from "../src/index";
 
 describe("extractedInquirySchema source semantics", () => {
   it("accepts null source when extracted information is absent", () => {

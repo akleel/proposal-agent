@@ -17,8 +17,7 @@ describe("createInquiry", () => {
         now: () => now,
       },
       {
-        rawText:
-          "   We need 45 rooms for our company offsite.   ",
+        rawText: "   We need 45 rooms for our company offsite.   ",
       },
     );
 
@@ -38,8 +37,7 @@ describe("createInquiry", () => {
       createInquiry(
         {
           repository,
-          generateId: () =>
-            "3ac7f2de-7430-47d6-b63f-9c899eafd248",
+          generateId: () => "3ac7f2de-7430-47d6-b63f-9c899eafd248",
           now: () => new Date(),
         },
         {

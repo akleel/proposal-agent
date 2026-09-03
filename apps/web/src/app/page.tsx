@@ -14,8 +14,7 @@ export default function Home() {
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
-            A production-minded exploration of reliable,
-            human-reviewed proposal automation.
+            A production-minded exploration of reliable, human-reviewed proposal automation.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-3">
@@ -30,31 +29,23 @@ export default function Home() {
 
         <section className="mt-20 grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm font-semibold text-zinc-950">
-              01 · Source
-            </p>
+            <p className="text-sm font-semibold text-zinc-950">01 · Source</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
               Preserve the original customer inquiry.
             </p>
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm font-semibold text-zinc-950">
-              02 · Review
-            </p>
+            <p className="text-sm font-semibold text-zinc-950">02 · Review</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Structured extraction surfaces uncertainty and
-              provenance.
+              Structured extraction surfaces uncertainty and provenance.
             </p>
           </div>
 
           <div className="rounded-2xl border border-zinc-200 bg-white p-6">
-            <p className="text-sm font-semibold text-zinc-950">
-              03 · Proposal
-            </p>
+            <p className="text-sm font-semibold text-zinc-950">03 · Proposal</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Deterministic pricing and proposal drafting remain under
-              application control.
+              Deterministic pricing and proposal drafting remain under application control.
             </p>
           </div>
         </section>

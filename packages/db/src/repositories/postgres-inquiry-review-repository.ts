@@ -1,19 +1,12 @@
-import type {
-  InquiryReviewRepository,
-  PersistedInquiryReview,
-} from "@proposal-agent/application";
-import {
-  extractedInquirySchema,
-} from "@proposal-agent/contracts";
+import type { InquiryReviewRepository, PersistedInquiryReview } from "@proposal-agent/application";
+import { extractedInquirySchema } from "@proposal-agent/contracts";
 import type {
   InquiryExtraction,
   InquiryReviewDecision,
   InquiryReviewDecisionKind,
   InquiryReviewResolvedValue,
 } from "@proposal-agent/domain";
-import type {
-  Pool,
-} from "pg";
+import type { Pool } from "pg";
 
 interface ReviewRow {
   readonly inquiry_id: string;
@@ -22,151 +15,93 @@ interface ReviewRow {
   readonly decisions: unknown;
 }
 
-function isRecord(
-  value: unknown,
-): value is Record<string, unknown> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value)
-  );
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function parseExtraction(
-  value: unknown,
-): InquiryExtraction {
-  const result =
-    extractedInquirySchema.safeParse(value);
+function parseExtraction(value: unknown): InquiryExtraction {
+  const result = extractedInquirySchema.safeParse(value);
 
   if (!result.success) {
-    throw new Error(
-      "Persisted inquiry extraction is invalid.",
-    );
+    throw new Error("Persisted inquiry extraction is invalid.");
   }
 
   return result.data;
 }
 
-function parseDate(
-  value: Date | string,
-): Date {
-  const date =
-    value instanceof Date
-      ? value
-      : new Date(value);
+function parseDate(value: Date | string): Date {
+  const date = value instanceof Date ? value : new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    throw new Error(
-      "Persisted review timestamp is invalid.",
-    );
+    throw new Error("Persisted review timestamp is invalid.");
   }
 
   return date;
 }
 
-function parseDecisionKind(
-  value: unknown,
-): InquiryReviewDecisionKind {
-  if (
-    value === "accepted" ||
-    value === "corrected"
-  ) {
+function parseDecisionKind(value: unknown): InquiryReviewDecisionKind {
+  if (value === "accepted" || value === "corrected") {
     return value;
   }
 
-  throw new Error(
-    "Persisted review decision kind is invalid.",
-  );
+  throw new Error("Persisted review decision kind is invalid.");
 }
 
-function parseResolvedValue(
-  value: unknown,
-): InquiryReviewResolvedValue {
+function parseResolvedValue(value: unknown): InquiryReviewResolvedValue {
   if (typeof value === "string") {
     return value;
   }
 
-  if (
-    typeof value === "number" &&
-    Number.isFinite(value)
-  ) {
+  if (typeof value === "number" && Number.isFinite(value)) {
     return value;
   }
 
-  throw new Error(
-    "Persisted resolved review value is invalid.",
-  );
+  throw new Error("Persisted resolved review value is invalid.");
 }
 
-function parseDecision(
-  value: unknown,
-): InquiryReviewDecision {
+function parseDecision(value: unknown): InquiryReviewDecision {
   if (!isRecord(value)) {
-    throw new Error(
-      "Persisted review decision is invalid.",
-    );
+    throw new Error("Persisted review decision is invalid.");
   }
 
   if (typeof value.field !== "string") {
-    throw new Error(
-      "Persisted review decision field is invalid.",
-    );
+    throw new Error("Persisted review decision field is invalid.");
   }
 
-  if (
-    typeof value.reviewedAt !== "string"
-  ) {
-    throw new Error(
-      "Persisted review timestamp is invalid.",
-    );
+  if (typeof value.reviewedAt !== "string") {
+    throw new Error("Persisted review timestamp is invalid.");
   }
 
   return {
     field: value.field,
     kind: parseDecisionKind(value.kind),
-    resolvedValue:
-      parseResolvedValue(
-        value.resolvedValue,
-      ),
-    reviewedAt:
-      parseDate(value.reviewedAt),
+    resolvedValue: parseResolvedValue(value.resolvedValue),
+    reviewedAt: parseDate(value.reviewedAt),
   };
 }
 
-function mapReviewRow(
-  row: ReviewRow,
-): PersistedInquiryReview {
+function mapReviewRow(row: ReviewRow): PersistedInquiryReview {
   if (!Array.isArray(row.decisions)) {
-    throw new Error(
-      "Persisted review decisions are invalid.",
-    );
+    throw new Error("Persisted review decisions are invalid.");
   }
 
   return {
     inquiryId: row.inquiry_id,
-    extraction:
-      parseExtraction(row.extraction),
-    extractedAt:
-      parseDate(row.extracted_at),
-    decisions:
-      row.decisions.map(parseDecision),
+    extraction: parseExtraction(row.extraction),
+    extractedAt: parseDate(row.extracted_at),
+    decisions: row.decisions.map(parseDecision),
   };
 }
 
-export class PostgresInquiryReviewRepository
-  implements InquiryReviewRepository
-{
-  public constructor(
-    private readonly pool: Pool,
-  ) {}
+export class PostgresInquiryReviewRepository implements InquiryReviewRepository {
+  public constructor(private readonly pool: Pool) {}
 
   public async replaceExtraction(
     inquiryId: string,
     extraction: InquiryExtraction,
     extractedAt: Date,
   ): Promise<void> {
-    const client =
-      await this.pool.connect();
+    const client = await this.pool.connect();
 
     try {
       await client.query("BEGIN");
@@ -184,11 +119,7 @@ export class PostgresInquiryReviewRepository
             extraction = EXCLUDED.extraction,
             extracted_at = EXCLUDED.extracted_at
         `,
-        [
-          inquiryId,
-          JSON.stringify(extraction),
-          extractedAt,
-        ],
+        [inquiryId, JSON.stringify(extraction), extractedAt],
       );
 
       await client.query(
@@ -208,12 +139,9 @@ export class PostgresInquiryReviewRepository
     }
   }
 
-  public async findByInquiryId(
-    inquiryId: string,
-  ): Promise<PersistedInquiryReview | null> {
-    const result =
-      await this.pool.query<ReviewRow>(
-        `
+  public async findByInquiryId(inquiryId: string): Promise<PersistedInquiryReview | null> {
+    const result = await this.pool.query<ReviewRow>(
+      `
           SELECT
             extraction.inquiry_id,
             extraction.extraction,
@@ -246,20 +174,15 @@ export class PostgresInquiryReviewRepository
             extraction.extraction,
             extraction.extracted_at
         `,
-        [inquiryId],
-      );
+      [inquiryId],
+    );
 
     const row = result.rows[0];
 
-    return row
-      ? mapReviewRow(row)
-      : null;
+    return row ? mapReviewRow(row) : null;
   }
 
-  public async saveDecision(
-    inquiryId: string,
-    decision: InquiryReviewDecision,
-  ): Promise<void> {
+  public async saveDecision(inquiryId: string, decision: InquiryReviewDecision): Promise<void> {
     await this.pool.query(
       `
         INSERT INTO inquiry_review_decisions (
@@ -288,9 +211,7 @@ export class PostgresInquiryReviewRepository
         inquiryId,
         decision.field,
         decision.kind,
-        JSON.stringify(
-          decision.resolvedValue,
-        ),
+        JSON.stringify(decision.resolvedValue),
         decision.reviewedAt,
       ],
     );

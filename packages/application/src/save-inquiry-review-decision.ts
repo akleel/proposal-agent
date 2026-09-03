@@ -3,15 +3,9 @@ import {
   type InquiryReviewDecisionKind,
 } from "@proposal-agent/domain";
 
-import type {
-  InquiryReviewState,
-} from "./inquiry-review-state";
-import {
-  toInquiryReviewState,
-} from "./inquiry-review-state";
-import type {
-  InquiryReviewRepository,
-} from "./inquiry-review-repository";
+import type { InquiryReviewState } from "./inquiry-review-state";
+import { toInquiryReviewState } from "./inquiry-review-state";
+import type { InquiryReviewRepository } from "./inquiry-review-repository";
 
 export interface SaveInquiryReviewDecisionInput {
   readonly inquiryId: string;
@@ -26,19 +20,13 @@ export interface SaveInquiryReviewDecisionDependencies {
 }
 
 export async function saveInquiryReviewDecision(
-  dependencies:
-    SaveInquiryReviewDecisionDependencies,
+  dependencies: SaveInquiryReviewDecisionDependencies,
   input: SaveInquiryReviewDecisionInput,
 ): Promise<InquiryReviewState> {
-  const review =
-    await dependencies.reviewRepository.findByInquiryId(
-      input.inquiryId,
-    );
+  const review = await dependencies.reviewRepository.findByInquiryId(input.inquiryId);
 
   if (!review) {
-    throw new Error(
-      "Run AI extraction before saving a review decision.",
-    );
+    throw new Error("Run AI extraction before saving a review decision.");
   }
 
   const decisionInput =
@@ -53,27 +41,18 @@ export async function saveInquiryReviewDecision(
           correctedValue: input.correctedValue,
         };
 
-  const decision =
-    createInquiryReviewDecision(
-      review.extraction,
-      decisionInput,
-      dependencies.now(),
-    );
-
-  await dependencies.reviewRepository.saveDecision(
-    input.inquiryId,
-    decision,
+  const decision = createInquiryReviewDecision(
+    review.extraction,
+    decisionInput,
+    dependencies.now(),
   );
 
-  const updated =
-    await dependencies.reviewRepository.findByInquiryId(
-      input.inquiryId,
-    );
+  await dependencies.reviewRepository.saveDecision(input.inquiryId, decision);
+
+  const updated = await dependencies.reviewRepository.findByInquiryId(input.inquiryId);
 
   if (!updated) {
-    throw new Error(
-      "Persisted review could not be reloaded.",
-    );
+    throw new Error("Persisted review could not be reloaded.");
   }
 
   return toInquiryReviewState(updated);

@@ -1,8 +1,4 @@
-import {
-  describe,
-  expect,
-  it,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   createInquiryReviewDecision,
@@ -55,24 +51,21 @@ function createExtraction(): InquiryExtraction {
 
 describe("createInquiryReviewDecision", () => {
   it("accepts an existing flagged value", () => {
-    const reviewedAt =
-      new Date("2026-08-25T08:00:00.000Z");
+    const reviewedAt = new Date("2026-08-25T08:00:00.000Z");
 
-    const decision =
-      createInquiryReviewDecision(
-        createExtraction(),
-        {
-          field: "requirements.0",
-          kind: "accepted",
-        },
-        reviewedAt,
-      );
+    const decision = createInquiryReviewDecision(
+      createExtraction(),
+      {
+        field: "requirements.0",
+        kind: "accepted",
+      },
+      reviewedAt,
+    );
 
     expect(decision).toEqual({
       field: "requirements.0",
       kind: "accepted",
-      resolvedValue:
-        "late checkout on the final day",
+      resolvedValue: "late checkout on the final day",
       reviewedAt,
     });
   });
@@ -91,20 +84,17 @@ describe("createInquiryReviewDecision", () => {
   });
 
   it("parses a corrected ISO date", () => {
-    const decision =
-      createInquiryReviewDecision(
-        createExtraction(),
-        {
-          field: "startDate",
-          kind: "corrected",
-          correctedValue: "2026-10-14",
-        },
-        new Date("2026-08-25T08:00:00.000Z"),
-      );
-
-    expect(decision.resolvedValue).toBe(
-      "2026-10-14",
+    const decision = createInquiryReviewDecision(
+      createExtraction(),
+      {
+        field: "startDate",
+        kind: "corrected",
+        correctedValue: "2026-10-14",
+      },
+      new Date("2026-08-25T08:00:00.000Z"),
     );
+
+    expect(decision.resolvedValue).toBe("2026-10-14");
   });
 
   it("rejects an impossible calendar date", () => {
@@ -131,8 +121,6 @@ describe("createInquiryReviewDecision", () => {
         },
         new Date(),
       ),
-    ).toThrow(
-      "does not require human review",
-    );
+    ).toThrow("does not require human review");
   });
 });

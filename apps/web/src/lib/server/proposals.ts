@@ -1,57 +1,36 @@
 import "server-only";
 
-import {
-  randomUUID,
-} from "node:crypto";
+import { randomUUID } from "node:crypto";
 
-import {
-  createProposalDraft,
-  getProposalDraft,
-} from "@proposal-agent/application";
+import { createProposalDraft, getProposalDraft } from "@proposal-agent/application";
 import {
   PostgresInquiryReviewRepository,
   PostgresProposalDraftRepository,
 } from "@proposal-agent/db";
-import type {
-  CatalogSelection,
-} from "@proposal-agent/domain";
+import type { CatalogSelection } from "@proposal-agent/domain";
 
-import {
-  StaticCatalogProvider,
-} from "@proposal-agent/catalog";
-import {
-  getDatabasePool,
-} from "./database";
+import { StaticCatalogProvider } from "@proposal-agent/catalog";
+import { getDatabasePool } from "./database";
 
 function createInquiryReviewRepository() {
-  return new PostgresInquiryReviewRepository(
-    getDatabasePool(),
-  );
+  return new PostgresInquiryReviewRepository(getDatabasePool());
 }
 
 function createProposalDraftRepository() {
-  return new PostgresProposalDraftRepository(
-    getDatabasePool(),
-  );
+  return new PostgresProposalDraftRepository(getDatabasePool());
 }
 
 export async function createPersistedProposalDraftUseCase(
   inquiryId: string,
-  selections:
-    readonly CatalogSelection[],
+  selections: readonly CatalogSelection[],
 ) {
   return createProposalDraft(
     {
-      reviewRepository:
-        createInquiryReviewRepository(),
-      catalogProvider:
-        new StaticCatalogProvider(),
-      proposalDraftRepository:
-        createProposalDraftRepository(),
-      generateId:
-        randomUUID,
-      now:
-        () => new Date(),
+      reviewRepository: createInquiryReviewRepository(),
+      catalogProvider: new StaticCatalogProvider(),
+      proposalDraftRepository: createProposalDraftRepository(),
+      generateId: randomUUID,
+      now: () => new Date(),
     },
     {
       inquiryId,
@@ -60,13 +39,10 @@ export async function createPersistedProposalDraftUseCase(
   );
 }
 
-export async function getPersistedProposalDraftUseCase(
-  id: string,
-) {
+export async function getPersistedProposalDraftUseCase(id: string) {
   return getProposalDraft(
     {
-      proposalDraftRepository:
-        createProposalDraftRepository(),
+      proposalDraftRepository: createProposalDraftRepository(),
     },
     id,
   );

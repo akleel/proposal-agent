@@ -1,14 +1,9 @@
 import { fileURLToPath } from "node:url";
 
-import {
-  createDatabasePool,
-  runMigrations,
-} from "../src/index";
+import { createDatabasePool, runMigrations } from "../src/index";
 import { requireEnv } from "../src/env";
 
-const migrationsDirectory = fileURLToPath(
-  new URL("../migrations/", import.meta.url),
-);
+const migrationsDirectory = fileURLToPath(new URL("../migrations/", import.meta.url));
 
 const pool = createDatabasePool(requireEnv("DATABASE_URL"));
 

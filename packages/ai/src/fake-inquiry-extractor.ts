@@ -9,17 +9,13 @@ import type { InquiryExtraction } from "@proposal-agent/domain";
 export class FakeInquiryExtractor implements InquiryExtractor {
   private readonly recordedInputs: string[] = [];
 
-  public constructor(
-    private readonly extraction: InquiryExtraction,
-  ) {}
+  public constructor(private readonly extraction: InquiryExtraction) {}
 
   public get inputs(): readonly string[] {
     return this.recordedInputs;
   }
 
-  public async extract(
-    rawText: string,
-  ): Promise<InquiryExtraction> {
+  public async extract(rawText: string): Promise<InquiryExtraction> {
     this.recordedInputs.push(rawText);
 
     return this.extraction;

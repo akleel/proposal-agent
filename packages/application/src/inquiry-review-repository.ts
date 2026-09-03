@@ -1,7 +1,4 @@
-import type {
-  InquiryExtraction,
-  InquiryReviewDecision,
-} from "@proposal-agent/domain";
+import type { InquiryExtraction, InquiryReviewDecision } from "@proposal-agent/domain";
 
 export interface PersistedInquiryReview {
   readonly inquiryId: string;
@@ -17,12 +14,7 @@ export interface InquiryReviewRepository {
     extractedAt: Date,
   ): Promise<void>;
 
-  findByInquiryId(
-    inquiryId: string,
-  ): Promise<PersistedInquiryReview | null>;
+  findByInquiryId(inquiryId: string): Promise<PersistedInquiryReview | null>;
 
-  saveDecision(
-    inquiryId: string,
-    decision: InquiryReviewDecision,
-  ): Promise<void>;
+  saveDecision(inquiryId: string, decision: InquiryReviewDecision): Promise<void>;
 }

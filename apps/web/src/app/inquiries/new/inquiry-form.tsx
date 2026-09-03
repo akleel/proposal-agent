@@ -32,20 +32,14 @@ function SubmitButton() {
 }
 
 export function InquiryForm() {
-  const [state, formAction] = useActionState(
-    createInquiryAction,
-    initialState,
-  );
+  const [state, formAction] = useActionState(createInquiryAction, initialState);
 
   const errors = state.errors.rawText ?? [];
 
   return (
     <form action={formAction} className="space-y-6">
       <div className="space-y-2">
-        <label
-          htmlFor="rawText"
-          className="block text-sm font-medium text-zinc-900"
-        >
+        <label htmlFor="rawText" className="block text-sm font-medium text-zinc-900">
           Customer inquiry
         </label>
 
@@ -57,29 +51,18 @@ export function InquiryForm() {
           minLength={10}
           maxLength={20000}
           aria-invalid={errors.length > 0}
-          aria-describedby={
-            errors.length > 0
-              ? "rawText-errors"
-              : "rawText-help"
-          }
+          aria-describedby={errors.length > 0 ? "rawText-errors" : "rawText-help"}
           placeholder="Hi, we're planning a company offsite for 65 people…"
           className="w-full resize-y rounded-xl border border-zinc-300 bg-white p-4 text-sm leading-6 text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10"
         />
 
-        <p
-          id="rawText-help"
-          className="text-sm text-zinc-500"
-        >
-          Paste the original customer request. After saving, you
-          can run guarded AI extraction and review the evidence
-          before downstream use.
+        <p id="rawText-help" className="text-sm text-zinc-500">
+          Paste the original customer request. After saving, you can run guarded AI extraction and
+          review the evidence before downstream use.
         </p>
 
         {errors.length > 0 ? (
-          <ul
-            id="rawText-errors"
-            className="space-y-1 text-sm text-red-700"
-          >
+          <ul id="rawText-errors" className="space-y-1 text-sm text-red-700">
             {errors.map((error) => (
               <li key={error}>{error}</li>
             ))}
@@ -88,10 +71,7 @@ export function InquiryForm() {
       </div>
 
       {state.message ? (
-        <p
-          role="status"
-          className="text-sm text-zinc-700"
-        >
+        <p role="status" className="text-sm text-zinc-700">
           {state.message}
         </p>
       ) : null}

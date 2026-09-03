@@ -1,13 +1,5 @@
-import {
-  z,
-} from "zod";
+import { z } from "zod";
 
-export const proposalDraftIdSchema =
-  z
-    .string()
-    .uuid();
+export const proposalDraftIdSchema = z.string().uuid();
 
-export type ProposalDraftIdContract =
-  z.infer<
-    typeof proposalDraftIdSchema
-  >;
+export type ProposalDraftIdContract = z.infer<typeof proposalDraftIdSchema>;

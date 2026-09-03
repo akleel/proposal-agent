@@ -37,9 +37,7 @@ export async function runMigrations(
     "SELECT filename, checksum FROM schema_migrations",
   );
 
-  const applied = new Map(
-    appliedResult.rows.map((row) => [row.filename, row.checksum]),
-  );
+  const applied = new Map(appliedResult.rows.map((row) => [row.filename, row.checksum]));
 
   const newlyApplied: string[] = [];
 
@@ -57,9 +55,7 @@ export async function runMigrations(
 
     if (existingChecksum) {
       if (existingChecksum !== migrationChecksum) {
-        throw new Error(
-          `Previously applied migration was modified: ${filename}`,
-        );
+        throw new Error(`Previously applied migration was modified: ${filename}`);
       }
 
       continue;

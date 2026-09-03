@@ -1,9 +1,7 @@
 import type { InquiryRepository } from "../src/index";
 import type { Inquiry } from "@proposal-agent/domain";
 
-export class InMemoryInquiryRepository
-  implements InquiryRepository
-{
+export class InMemoryInquiryRepository implements InquiryRepository {
   private readonly inquiries = new Map<string, Inquiry>();
 
   public async create(inquiry: Inquiry): Promise<void> {
