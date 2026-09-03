@@ -1,7 +1,7 @@
 import type { InquiryExtractor } from "@proposal-agent/application";
 import type { InquiryExtraction } from "@proposal-agent/domain";
-import OpenAI from "openai";
-import { zodTextFormat } from "openai/helpers/zod";
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText, Output } from "ai";
 
 import { modelInquiryExtractionSchema } from "./model-inquiry-extraction";
 import { toInquiryExtraction } from "./to-inquiry-extraction";
@@ -54,33 +54,28 @@ export interface OpenAIInquiryExtractorOptions {
 }
 
 export class OpenAIInquiryExtractor implements InquiryExtractor {
-  private readonly client: OpenAI;
+  private readonly provider: ReturnType<typeof createOpenAI>;
   private readonly model: string;
 
   public constructor(options: OpenAIInquiryExtractorOptions = {}) {
-    this.client = new OpenAI({
-      apiKey: options.apiKey,
-    });
+    this.provider = options.apiKey ? createOpenAI({ apiKey: options.apiKey }) : createOpenAI();
 
     this.model = options.model ?? process.env.OPENAI_MODEL ?? DEFAULT_MODEL;
   }
 
   public async extract(rawText: string): Promise<InquiryExtraction> {
-    const response = await this.client.responses.parse({
-      model: this.model,
-      instructions: EXTRACTION_INSTRUCTIONS,
-      input: rawText,
-      text: {
-        format: zodTextFormat(modelInquiryExtractionSchema, "inquiry_extraction"),
-      },
+    const { output } = await generateText({
+      model: this.provider(this.model),
+      system: EXTRACTION_INSTRUCTIONS,
+      prompt: rawText,
+      output: Output.object({
+        name: "inquiry_extraction",
+        description:
+          "Structured proposal requirements extracted only from evidence in the customer inquiry.",
+        schema: modelInquiryExtractionSchema,
+      }),
     });
 
-    if (!response.output_parsed) {
-      throw new Error(
-        `OpenAI returned no parsed inquiry extraction. Response status: ${response.status}.`,
-      );
-    }
-
-    return toInquiryExtraction(rawText, response.output_parsed);
+    return toInquiryExtraction(rawText, output);
   }
 }

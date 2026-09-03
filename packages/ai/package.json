@@ -11,10 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.56",
     "@proposal-agent/application": "workspace:*",
     "@proposal-agent/contracts": "workspace:*",
     "@proposal-agent/domain": "workspace:*",
-    "openai": "^7.5.0",
+    "ai": "^7.0.90",
     "zod": "^4.4.3"
   },
   "devDependencies": {
