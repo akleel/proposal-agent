@@ -22,7 +22,7 @@ approval, or final proposal state.
 | Persist inquiry in PostgreSQL        | Implemented |
 | Reload persisted inquiry by ID       | Implemented |
 | Provider-neutral AI port             | Implemented |
-| OpenAI Structured Outputs adapter    | Implemented |
+| Vercel AI SDK + OpenAI adapter       | Implemented |
 | Evidence-backed extraction           | Implemented |
 | Deterministic review policy          | Implemented |
 | Prompt-injection security evaluation | Implemented |
@@ -129,7 +129,8 @@ PostgreSQL --> infrastructure
 
 The application layer owns the `InquiryExtractor` abstraction.
 
-The OpenAI implementation sits behind that port:
+The production implementation uses Vercel AI SDK with the OpenAI provider and
+sits behind that port:
 
 ```text
 Customer inquiry
@@ -144,7 +145,10 @@ InquiryExtractor
 OpenAIInquiryExtractor
       |
       v
-Structured Outputs
+Vercel AI SDK + OpenAI
+      |
+      v
+Structured output
       |
       v
 runtime validation
