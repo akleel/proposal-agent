@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { getReviewIssues, type InquiryExtraction } from "../src/index";
 
@@ -32,7 +32,7 @@ describe("getReviewIssues", () => {
       budgetCents: {
         value: 2800000,
         confidence: 0.95,
-        source: "budget around EUR 28k",
+        source: "budget around SEK 28k",
         requiresReview: false,
       },
       requirements: [

@@ -1,6 +1,9 @@
 import type {
   InquiryExtraction,
 } from "./inquiry";
+import {
+  isValidIsoDate,
+} from "./iso-date";
 
 export type InquiryReviewDecisionKind =
   | "accepted"
@@ -99,51 +102,16 @@ function parseInteger(
   return parsed;
 }
 
-function isLeapYear(year: number): boolean {
-  return (
-    year % 400 === 0 ||
-    (year % 4 === 0 && year % 100 !== 0)
-  );
-}
-
-function getDaysInMonth(
-  year: number,
-  month: number,
-): number {
-  if (month === 2) {
-    return isLeapYear(year) ? 29 : 28;
-  }
-
-  if ([4, 6, 9, 11].includes(month)) {
-    return 30;
-  }
-
-  return 31;
-}
-
 function parseIsoDate(value: string): string {
   const trimmed = value.trim();
 
-  const match =
-    /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
-
-  if (!match) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
     throw new InquiryReviewDecisionError(
       "Date must use YYYY-MM-DD.",
     );
   }
 
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-
-  if (
-    year < 1 ||
-    month < 1 ||
-    month > 12 ||
-    day < 1 ||
-    day > getDaysInMonth(year, month)
-  ) {
+  if (!isValidIsoDate(trimmed)) {
     throw new InquiryReviewDecisionError(
       "Date must be a valid calendar date.",
     );
@@ -192,7 +160,7 @@ function parseCorrectedValue(
     case "budgetCents":
       return parseInteger(correctedValue, {
         minimum: 0,
-        label: "Budget in minor units",
+        label: "Budget in SEK minor units",
       });
 
     case "startDate":

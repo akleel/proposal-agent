@@ -1,3 +1,6 @@
+import {
+  isoDateSchema,
+} from "@proposal-agent/contracts";
 import { z } from "zod";
 
 const confidenceSchema = z
@@ -25,13 +28,6 @@ function modelFieldSchema<T extends z.ZodType>(
     source: sourceSchema,
   });
 }
-
-const isoDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .describe(
-    "ISO date YYYY-MM-DD. Use null unless the complete date including year is supported by the inquiry.",
-  );
 
 export const modelInquiryExtractionSchema = z.object({
   guests: modelFieldSchema(
@@ -71,7 +67,7 @@ export const modelInquiryExtractionSchema = z.object({
       .nonnegative()
       .nullable()
       .describe(
-        "Explicit customer budget in minor currency units. Do not perform currency conversion. Use null if the monetary amount is absent or ambiguous.",
+        "Explicit customer budget in SEK minor units. Use null unless the source explicitly identifies SEK. Never convert another currency to SEK.",
       ),
   ),
 

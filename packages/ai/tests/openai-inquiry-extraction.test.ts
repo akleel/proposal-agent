@@ -72,6 +72,17 @@ describe("modelInquiryExtractionSchema", () => {
       modelInquiryExtractionSchema.parse(candidate),
     ).not.toThrow();
   });
+
+  it("rejects impossible calendar dates", () => {
+    const candidate = createModelExtraction();
+
+    candidate.startDate.value = "2026-02-30";
+    candidate.startDate.source = "2026-02-30";
+
+    expect(() =>
+      modelInquiryExtractionSchema.parse(candidate),
+    ).toThrow();
+  });
 });
 
 describe("toInquiryExtraction", () => {
@@ -169,6 +180,26 @@ describe("toInquiryExtraction", () => {
 
     expect(extraction.rooms.value).toBe(35);
     expect(extraction.rooms.requiresReview).toBe(true);
+  });
+
+  it("does not trust a non-SEK budget for pricing", () => {
+    const modelExtraction = createModelExtraction();
+
+    modelExtraction.budgetCents.value = 2_800_000;
+    modelExtraction.budgetCents.confidence = 0.99;
+    modelExtraction.budgetCents.source = "EUR 28,000";
+
+    const extraction = toInquiryExtraction(
+      "Customer budget is EUR 28,000.",
+      modelExtraction,
+    );
+
+    expect(extraction.budgetCents).toEqual({
+      value: null,
+      confidence: 0.99,
+      source: "EUR 28,000",
+      requiresReview: true,
+    });
   });
 
   it("produces domain review issues deterministically", () => {

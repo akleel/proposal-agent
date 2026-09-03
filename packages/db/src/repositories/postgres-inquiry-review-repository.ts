@@ -2,6 +2,9 @@ import type {
   InquiryReviewRepository,
   PersistedInquiryReview,
 } from "@proposal-agent/application";
+import {
+  extractedInquirySchema,
+} from "@proposal-agent/contracts";
 import type {
   InquiryExtraction,
   InquiryReviewDecision,
@@ -32,35 +35,16 @@ function isRecord(
 function parseExtraction(
   value: unknown,
 ): InquiryExtraction {
-  if (!isRecord(value)) {
+  const result =
+    extractedInquirySchema.safeParse(value);
+
+  if (!result.success) {
     throw new Error(
       "Persisted inquiry extraction is invalid.",
     );
   }
 
-  const fieldNames = [
-    "guests",
-    "rooms",
-    "startDate",
-    "endDate",
-    "budgetCents",
-  ] as const;
-
-  for (const fieldName of fieldNames) {
-    if (!isRecord(value[fieldName])) {
-      throw new Error(
-        "Persisted inquiry extraction is invalid.",
-      );
-    }
-  }
-
-  if (!Array.isArray(value.requirements)) {
-    throw new Error(
-      "Persisted inquiry extraction is invalid.",
-    );
-  }
-
-  return value as unknown as InquiryExtraction;
+  return result.data;
 }
 
 function parseDate(

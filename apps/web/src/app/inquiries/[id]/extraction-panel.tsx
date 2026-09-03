@@ -90,7 +90,7 @@ function formatReviewIssueField(
       startDate: "Start date",
       endDate: "End date",
       budgetCents:
-        "Budget (minor units)",
+        "Budget (SEK minor units)",
     };
 
   const label = labels[field];
@@ -363,13 +363,13 @@ function ResolvedInquiryPanel({
 
         <div>
           <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-            Budget
+            Budget (SEK)
           </dt>
           <dd className="mt-1 font-medium text-emerald-950">
             {formatNullableValue(
               inquiry.budgetCents,
             )}{" "}
-            minor units
+            SEK minor units
           </dd>
         </div>
 
@@ -628,7 +628,7 @@ export function ExtractionPanel({
               />
 
               <ReviewField
-                label="Budget (minor units)"
+                label="Budget (SEK minor units)"
                 value={formatNullableValue(
                   result.extraction.budgetCents.value,
                 )}
@@ -883,7 +883,7 @@ export function ExtractionPanel({
                                   placeholder={
                                     issue.field ===
                                     "budgetCents"
-                                      ? "Minor units, e.g. 18000000"
+                                      ? "SEK minor units, e.g. 18000000"
                                       : "Enter corrected value"
                                   }
                                   className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10"
