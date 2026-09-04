@@ -29,12 +29,6 @@ describe("extractedInquirySchema source semantics", () => {
         source: null,
         requiresReview: true,
       },
-      budgetCents: {
-        value: null,
-        confidence: 0,
-        source: null,
-        requiresReview: true,
-      },
       requirements: [],
     });
 

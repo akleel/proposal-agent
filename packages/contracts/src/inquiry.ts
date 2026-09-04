@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const confidenceSchema = z.number().min(0).max(1);
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const SEK_CURRENCY_PATTERN = /\bSEK\b/i;
 
 function isLeapYear(year: number): boolean {
   return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0);
@@ -47,21 +46,11 @@ export const reviewableFieldSchema = <T extends z.ZodType>(valueSchema: T) =>
     requiresReview: z.boolean(),
   });
 
-const budgetFieldSchema = reviewableFieldSchema(z.number().int().nonnegative().nullable()).refine(
-  (field) =>
-    field.value === null || (field.source !== null && SEK_CURRENCY_PATTERN.test(field.source)),
-  {
-    message: "A non-null budget must be explicitly stated in SEK.",
-    path: ["source"],
-  },
-);
-
 export const extractedInquirySchema = z.object({
   guests: reviewableFieldSchema(z.number().int().positive().nullable()),
   rooms: reviewableFieldSchema(z.number().int().nonnegative().nullable()),
   startDate: reviewableFieldSchema(isoDateSchema.nullable()),
   endDate: reviewableFieldSchema(isoDateSchema.nullable()),
-  budgetCents: budgetFieldSchema,
   requirements: z.array(reviewableFieldSchema(z.string().min(1))),
 });
 

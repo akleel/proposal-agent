@@ -82,8 +82,6 @@ function getCandidateValue(result: InquiryExtractionResult, field: string): stri
       return result.extraction.startDate.value;
     case "endDate":
       return result.extraction.endDate.value;
-    case "budgetCents":
-      return result.extraction.budgetCents.value;
     default:
       break;
   }
@@ -102,7 +100,7 @@ function getCorrectionInputType(field: string): "date" | "number" | "text" {
     return "date";
   }
 
-  if (field === "guests" || field === "rooms" || field === "budgetCents") {
+  if (field === "guests" || field === "rooms") {
     return "number";
   }
 

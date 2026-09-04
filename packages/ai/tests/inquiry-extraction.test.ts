@@ -29,11 +29,6 @@ function createModelExtraction(): ModelInquiryExtraction {
       confidence: 0.8,
       source: "14-16 October",
     },
-    budgetCents: {
-      value: 18_000_000,
-      confidence: 0.95,
-      source: "SEK 180,000",
-    },
     requirements: [
       {
         value: "Meeting space for everyone",
@@ -83,7 +78,6 @@ describe("toInquiryExtraction", () => {
 
     expect(extraction.guests.requiresReview).toBe(false);
     expect(extraction.rooms.requiresReview).toBe(false);
-    expect(extraction.budgetCents.requiresReview).toBe(false);
     expect(extraction.requirements[0]?.requiresReview).toBe(false);
   });
 
@@ -113,13 +107,9 @@ describe("toInquiryExtraction", () => {
 
     modelExtraction.startDate.source = '"14-16 October"';
 
-    modelExtraction.budgetCents.source = '"SEK 180,000"';
-
     const extraction = toInquiryExtraction(rawText, modelExtraction);
 
     expect(extraction.startDate.source).toBe("14-16 October");
-
-    expect(extraction.budgetCents.source).toBeNull();
   });
 
   it("requires review when source evidence is fabricated", () => {
@@ -141,23 +131,6 @@ describe("toInquiryExtraction", () => {
 
     expect(extraction.rooms.value).toBe(35);
     expect(extraction.rooms.requiresReview).toBe(true);
-  });
-
-  it("ignores budget while it is out of scope", () => {
-    const modelExtraction = createModelExtraction();
-
-    modelExtraction.budgetCents.value = 2_800_000;
-    modelExtraction.budgetCents.confidence = 0.99;
-    modelExtraction.budgetCents.source = "EUR 28,000";
-
-    const extraction = toInquiryExtraction("Customer budget is EUR 28,000.", modelExtraction);
-
-    expect(extraction.budgetCents).toEqual({
-      value: null,
-      confidence: 0,
-      source: null,
-      requiresReview: false,
-    });
   });
 
   it("produces domain review issues deterministically", () => {

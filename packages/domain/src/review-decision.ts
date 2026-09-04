@@ -40,8 +40,6 @@ function getReviewCandidate(extraction: InquiryExtraction, field: string): Revie
       return extraction.startDate;
     case "endDate":
       return extraction.endDate;
-    case "budgetCents":
-      return extraction.budgetCents;
     default:
       break;
   }
@@ -123,12 +121,6 @@ function parseCorrectedValue(field: string, correctedValue: string): InquiryRevi
       return parseInteger(correctedValue, {
         minimum: 0,
         label: "Rooms",
-      });
-
-    case "budgetCents":
-      return parseInteger(correctedValue, {
-        minimum: 0,
-        label: "Budget in SEK minor units",
       });
 
     case "startDate":

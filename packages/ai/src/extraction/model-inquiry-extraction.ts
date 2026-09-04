@@ -48,15 +48,6 @@ export const modelInquiryExtractionSchema = z.object({
 
   endDate: modelFieldSchema(isoDateSchema.nullable()),
 
-  budgetCents: modelFieldSchema(
-    z
-      .number()
-      .int()
-      .nonnegative()
-      .nullable()
-      .describe("Budget is out of scope for this demo. Return null."),
-  ),
-
   requirements: z.array(
     modelFieldSchema(
       z

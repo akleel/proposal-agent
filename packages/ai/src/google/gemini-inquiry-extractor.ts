@@ -32,8 +32,7 @@ Rules:
 - Use null when guests, rooms, or dates are not sufficiently supported.
 - A date must include a supported year before returning YYYY-MM-DD.
 - Do not infer a year solely from today's date.
-- Budget is out of scope for this demo.
-- Always return budgetCents with value = null, confidence = 0, and source = null.
+- Ignore budget and pricing constraints; they are out of scope for this demo.
 - Extract only products or services that the customer positively requests as requirements.
 - Do not include products or services that the customer explicitly rejects, does not need, or excludes.
 - For example, "We need breakfast but do not need a meeting room" must include Breakfast and must not include Meeting Room.

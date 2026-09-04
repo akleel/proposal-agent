@@ -16,7 +16,6 @@ export interface InquiryExtraction {
   readonly rooms: ReviewableField<number | null>;
   readonly startDate: ReviewableField<string | null>;
   readonly endDate: ReviewableField<string | null>;
-  readonly budgetCents: ReviewableField<number | null>;
   readonly requirements: readonly ReviewableField<string>[];
 }
 
@@ -32,7 +31,6 @@ export function getReviewIssues(extraction: InquiryExtraction): readonly ReviewI
     ["rooms", extraction.rooms],
     ["startDate", extraction.startDate],
     ["endDate", extraction.endDate],
-    ["budgetCents", extraction.budgetCents],
   ];
 
   const fieldIssues = fields
