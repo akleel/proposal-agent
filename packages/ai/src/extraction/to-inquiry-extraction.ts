@@ -69,18 +69,6 @@ function toReviewableField<T>(rawText: string, field: ModelField<T>): Reviewable
     requiresReview,
   };
 }
-
-function toBudgetField(
-  _rawText: string,
-  _field: ModelField<number | null>,
-): ReviewableField<number | null> {
-  return {
-    value: null,
-    confidence: 0,
-    source: null,
-    requiresReview: false,
-  };
-}
 export function toInquiryExtraction(
   rawText: string,
   modelExtraction: ModelInquiryExtraction,
@@ -90,7 +78,6 @@ export function toInquiryExtraction(
     rooms: toReviewableField(rawText, modelExtraction.rooms),
     startDate: toReviewableField(rawText, modelExtraction.startDate),
     endDate: toReviewableField(rawText, modelExtraction.endDate),
-    budgetCents: toBudgetField(rawText, modelExtraction.budgetCents),
     requirements: modelExtraction.requirements.map((requirement) =>
       toReviewableField(rawText, requirement),
     ),

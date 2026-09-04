@@ -35,12 +35,6 @@ function createExtraction(requirementRequiresReview = false): InquiryExtraction 
       source: "2026-10-16",
       requiresReview: false,
     },
-    budgetCents: {
-      value: 18_000_000,
-      confidence: 0.99,
-      source: "SEK 180,000",
-      requiresReview: false,
-    },
     requirements: [
       {
         value: "late checkout",
@@ -61,7 +55,6 @@ describe("resolveReviewedInquiry", () => {
       rooms: 35,
       startDate: "2026-10-14",
       endDate: "2026-10-16",
-      budgetCents: 18_000_000,
       requirements: ["late checkout"],
     });
   });

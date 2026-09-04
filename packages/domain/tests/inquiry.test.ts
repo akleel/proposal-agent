@@ -29,12 +29,6 @@ describe("getReviewIssues", () => {
         source: "October 12-14",
         requiresReview: false,
       },
-      budgetCents: {
-        value: 2800000,
-        confidence: 0.95,
-        source: "budget around SEK 28k",
-        requiresReview: false,
-      },
       requirements: [
         {
           value: "Late checkout",

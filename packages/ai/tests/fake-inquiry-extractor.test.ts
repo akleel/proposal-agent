@@ -29,12 +29,6 @@ function createExtraction(): InquiryExtraction {
       source: "October",
       requiresReview: true,
     },
-    budgetCents: {
-      value: 18_000_000,
-      confidence: 0.99,
-      source: "SEK 180,000",
-      requiresReview: false,
-    },
     requirements: [
       {
         value: "Meeting space",

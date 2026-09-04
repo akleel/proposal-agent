@@ -29,12 +29,6 @@ describe("review issues with absent evidence", () => {
         source: null,
         requiresReview: false,
       },
-      budgetCents: {
-        value: null,
-        confidence: 0,
-        source: null,
-        requiresReview: false,
-      },
       requirements: [],
     };
 

@@ -6,7 +6,6 @@ export interface ResolvedInquiry {
   readonly rooms: number | null;
   readonly startDate: string | null;
   readonly endDate: string | null;
-  readonly budgetCents: number | null;
   readonly requirements: readonly string[];
 }
 
@@ -159,7 +158,6 @@ export function resolveReviewedInquiry(
     rooms: resolveNumberField("rooms", extraction.rooms, decisionsByField),
     startDate: resolveStringField("startDate", extraction.startDate, decisionsByField),
     endDate: resolveStringField("endDate", extraction.endDate, decisionsByField),
-    budgetCents: resolveNumberField("budgetCents", extraction.budgetCents, decisionsByField),
     requirements: extraction.requirements.map((requirement, index) =>
       resolveRequirement(`requirements.${index}`, requirement, decisionsByField),
     ),

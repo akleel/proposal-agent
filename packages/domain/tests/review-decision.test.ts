@@ -32,12 +32,6 @@ function createExtraction(): InquiryExtraction {
       source: "14-16 October",
       requiresReview: true,
     },
-    budgetCents: {
-      value: 18_000_000,
-      confidence: 0.99,
-      source: "SEK 180,000",
-      requiresReview: false,
-    },
     requirements: [
       {
         value: "late checkout on the final day",
