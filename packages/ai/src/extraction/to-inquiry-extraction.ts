@@ -71,24 +71,16 @@ function toReviewableField<T>(rawText: string, field: ModelField<T>): Reviewable
 }
 
 function toBudgetField(
-  rawText: string,
-  field: ModelField<number | null>,
+  _rawText: string,
+  _field: ModelField<number | null>,
 ): ReviewableField<number | null> {
-  const candidate = toReviewableField(rawText, field);
-
-  const hasExplicitSek = candidate.source !== null && /\bSEK\b/i.test(candidate.source);
-
-  if (candidate.value !== null && !hasExplicitSek) {
-    return {
-      ...candidate,
-      value: null,
-      requiresReview: true,
-    };
-  }
-
-  return candidate;
+  return {
+    value: null,
+    confidence: 0,
+    source: null,
+    requiresReview: false,
+  };
 }
-
 export function toInquiryExtraction(
   rawText: string,
   modelExtraction: ModelInquiryExtraction,

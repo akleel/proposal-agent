@@ -2,13 +2,14 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 
-import { OpenAIInquiryExtractor } from "@proposal-agent/ai";
+import { GeminiInquiryExtractor } from "@proposal-agent/ai";
 import {
   calculateInquiryPricing,
   createInquiry,
   extractInquiryReview,
   getInquiry,
   getInquiryReview,
+  getResolvedInquiry,
   saveInquiryReviewDecision,
 } from "@proposal-agent/application";
 import { PostgresInquiryRepository, PostgresInquiryReviewRepository } from "@proposal-agent/db";
@@ -29,23 +30,23 @@ function createCatalogProvider(): StaticCatalogProvider {
   return new StaticCatalogProvider();
 }
 
-function createInquiryExtractor(): OpenAIInquiryExtractor {
-  const apiKey = process.env.OPENAI_API_KEY;
+function createInquiryExtractor(): GeminiInquiryExtractor {
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error("Missing OPENAI_API_KEY for server-side inquiry extraction.");
+    throw new Error("Missing GEMINI_API_KEY for server-side inquiry extraction.");
   }
 
-  const model = process.env.OPENAI_MODEL;
+  const model = process.env.GEMINI_MODEL;
 
   if (model) {
-    return new OpenAIInquiryExtractor({
+    return new GeminiInquiryExtractor({
       apiKey,
       model,
     });
   }
 
-  return new OpenAIInquiryExtractor({
+  return new GeminiInquiryExtractor({
     apiKey,
   });
 }
@@ -86,6 +87,15 @@ export async function extractPersistedInquiryUseCase(id: string) {
 
 export async function getPersistedInquiryReviewUseCase(id: string) {
   return getInquiryReview(
+    {
+      reviewRepository: createInquiryReviewRepository(),
+    },
+    id,
+  );
+}
+
+export async function getPersistedResolvedInquiryUseCase(id: string) {
+  return getResolvedInquiry(
     {
       reviewRepository: createInquiryReviewRepository(),
     },

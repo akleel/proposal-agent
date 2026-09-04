@@ -54,9 +54,7 @@ export const modelInquiryExtractionSchema = z.object({
       .int()
       .nonnegative()
       .nullable()
-      .describe(
-        "Explicit customer budget in SEK minor units. Use null unless the source explicitly identifies SEK. Never convert another currency to SEK.",
-      ),
+      .describe("Budget is out of scope for this demo. Return null."),
   ),
 
   requirements: z.array(

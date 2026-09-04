@@ -116,7 +116,9 @@ export async function inquiryReviewWorkflowAction(
             : "Extraction saved with no deterministic review flags.",
         result,
       };
-    } catch {
+    } catch (error) {
+      console.error("Inquiry extraction failed.", error);
+
       return errorState(
         "AI extraction could not be completed. Check the server configuration and try again.",
         previousState.result,

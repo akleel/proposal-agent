@@ -1,13 +1,13 @@
 export { FakeInquiryExtractor } from "./fake-inquiry-extractor";
 
 export {
-  OpenAIInquiryExtractor,
-  type OpenAIInquiryExtractorOptions,
-} from "./openai/openai-inquiry-extractor";
+  GeminiInquiryExtractor,
+  type GeminiInquiryExtractorOptions,
+} from "./google/gemini-inquiry-extractor";
 
 export {
   modelInquiryExtractionSchema,
   type ModelInquiryExtraction,
-} from "./openai/model-inquiry-extraction";
+} from "./extraction/model-inquiry-extraction";
 
-export { toInquiryExtraction } from "./openai/to-inquiry-extraction";
+export { toInquiryExtraction } from "./extraction/to-inquiry-extraction";
