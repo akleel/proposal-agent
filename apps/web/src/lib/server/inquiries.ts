@@ -4,7 +4,6 @@ import { randomUUID } from "node:crypto";
 
 import { GeminiInquiryExtractor } from "@proposal-agent/ai";
 import {
-  calculateInquiryPricing,
   createInquiry,
   extractInquiryReview,
   getInquiry,
@@ -13,9 +12,8 @@ import {
   saveInquiryReviewDecision,
 } from "@proposal-agent/application";
 import { PostgresInquiryRepository, PostgresInquiryReviewRepository } from "@proposal-agent/db";
-import type { CatalogSelection, InquiryReviewDecisionKind } from "@proposal-agent/domain";
+import type { InquiryReviewDecisionKind } from "@proposal-agent/domain";
 
-import { StaticCatalogProvider } from "@proposal-agent/catalog";
 import { getDatabasePool } from "./database";
 
 function createInquiryRepository() {
@@ -24,10 +22,6 @@ function createInquiryRepository() {
 
 function createInquiryReviewRepository() {
   return new PostgresInquiryReviewRepository(getDatabasePool());
-}
-
-function createCatalogProvider(): StaticCatalogProvider {
-  return new StaticCatalogProvider();
 }
 
 function createInquiryExtractor(): GeminiInquiryExtractor {
@@ -100,26 +94,6 @@ export async function getPersistedResolvedInquiryUseCase(id: string) {
       reviewRepository: createInquiryReviewRepository(),
     },
     id,
-  );
-}
-
-export async function getCurrentPricingCatalogUseCase() {
-  return createCatalogProvider().getCurrentCatalog();
-}
-
-export async function calculatePersistedInquiryPricingUseCase(
-  inquiryId: string,
-  selections: readonly CatalogSelection[],
-) {
-  return calculateInquiryPricing(
-    {
-      reviewRepository: createInquiryReviewRepository(),
-      catalogProvider: createCatalogProvider(),
-    },
-    {
-      inquiryId,
-      selections,
-    },
   );
 }
 

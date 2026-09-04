@@ -6,14 +6,13 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
-    "clean:generated": "node -e \"require(\u0027node:fs\u0027).rmSync(\u0027.next\u0027, { recursive: true, force: true })\"",
-    "typecheck": "pnpm clean:generated \u0026\u0026 next typegen \u0026\u0026 tsc --noEmit",
-    "build": "pnpm clean:generated \u0026\u0026 next build"
+    "clean:generated": "node -e \"require('node:fs').rmSync('.next', { recursive: true, force: true })\"",
+    "typecheck": "pnpm clean:generated && next typegen && tsc --noEmit",
+    "build": "pnpm clean:generated && next build"
   },
   "dependencies": {
     "@proposal-agent/ai": "workspace:*",
     "@proposal-agent/application": "workspace:*",
-    "@proposal-agent/catalog": "workspace:*",
     "@proposal-agent/contracts": "workspace:*",
     "@proposal-agent/db": "workspace:*",
     "@proposal-agent/domain": "workspace:*",

@@ -32,9 +32,6 @@ importers:
       '@proposal-agent/application':
         specifier: workspace:*
         version: link:../../packages/application
-      '@proposal-agent/catalog':
-        specifier: workspace:*
-        version: link:../../packages/catalog
       '@proposal-agent/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
