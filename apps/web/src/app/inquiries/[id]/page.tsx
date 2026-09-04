@@ -2,14 +2,9 @@ import { inquiryIdSchema } from "@proposal-agent/contracts";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-  getCurrentPricingCatalogUseCase,
-  getInquiryUseCase,
-  getPersistedInquiryReviewUseCase,
-} from "@/lib/server/inquiries";
+import { getInquiryUseCase, getPersistedInquiryReviewUseCase } from "@/lib/server/inquiries";
 
 import { ExtractionPanel } from "./extraction-panel";
-import { PricingPanel } from "./pricing-panel";
 import { serializeInquiryReview } from "./types";
 
 interface InquiryPageProps {
@@ -29,31 +24,21 @@ export default async function InquiryPage({ params }: InquiryPageProps) {
     notFound();
   }
 
-  const [inquiry, review, catalog] = await Promise.all([
+  const [inquiry, review] = await Promise.all([
     getInquiryUseCase(parsedId.data),
     getPersistedInquiryReviewUseCase(parsedId.data),
-    getCurrentPricingCatalogUseCase(),
   ]);
 
   if (!inquiry) {
     notFound();
   }
 
-  const pricingContextKey = review
-    ? [
-        review.extractedAt.toISOString(),
-        ...review.decisions.map(
-          (decision) => `${decision.field}:${decision.reviewedAt.toISOString()}`,
-        ),
-      ].join("|")
-    : "not-extracted";
-
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="text-sm font-medium text-zinc-600 hover:text-zinc-950">
-            ← Proposal Agent
+            â† Proposal Agent
           </Link>
 
           <Link
@@ -115,12 +100,27 @@ export default async function InquiryPage({ params }: InquiryPageProps) {
             initialResult={review ? serializeInquiryReview(review) : null}
           />
 
-          <PricingPanel
-            key={pricingContextKey}
-            inquiryId={inquiry.id}
-            catalog={catalog}
-            resolvedInquiry={review?.resolvedInquiry ?? null}
-          />
+          <section className="mt-8 rounded-2xl border border-blue-200 bg-blue-50 p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700">
+              Proposales
+            </p>
+
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-blue-950">
+              Build the proposal with the live Proposales catalog
+            </h2>
+
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-blue-800">
+              Continue with real Proposales Content Library products. Proposales owns product
+              pricing, VAT, company currency and the final proposal totals.
+            </p>
+
+            <Link
+              href={`/inquiries/${parsedId.data}/proposales`}
+              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+            >
+              Open Proposales builder
+            </Link>
+          </section>
         </div>
       </div>
     </main>

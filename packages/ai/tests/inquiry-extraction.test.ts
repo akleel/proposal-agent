@@ -119,7 +119,7 @@ describe("toInquiryExtraction", () => {
 
     expect(extraction.startDate.source).toBe("14-16 October");
 
-    expect(extraction.budgetCents.source).toBe("SEK 180,000");
+    expect(extraction.budgetCents.source).toBeNull();
   });
 
   it("requires review when source evidence is fabricated", () => {
@@ -143,7 +143,7 @@ describe("toInquiryExtraction", () => {
     expect(extraction.rooms.requiresReview).toBe(true);
   });
 
-  it("does not trust a non-SEK budget for pricing", () => {
+  it("ignores budget while it is out of scope", () => {
     const modelExtraction = createModelExtraction();
 
     modelExtraction.budgetCents.value = 2_800_000;
@@ -154,9 +154,9 @@ describe("toInquiryExtraction", () => {
 
     expect(extraction.budgetCents).toEqual({
       value: null,
-      confidence: 0.99,
-      source: "EUR 28,000",
-      requiresReview: true,
+      confidence: 0,
+      source: null,
+      requiresReview: false,
     });
   });
 
