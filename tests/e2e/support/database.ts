@@ -83,22 +83,6 @@ export async function seedInquiryExtraction(
     await pool.end();
   }
 }
-
-export async function deleteProposalDraftById(proposalDraftId: string): Promise<void> {
-  const pool = createDatabasePool(requireDatabaseUrl());
-
-  try {
-    await pool.query(
-      `
-        DELETE FROM proposal_drafts
-        WHERE id = $1
-      `,
-      [proposalDraftId],
-    );
-  } finally {
-    await pool.end();
-  }
-}
 export async function deleteInquiryById(inquiryId: string): Promise<void> {
   const pool = createDatabasePool(requireDatabaseUrl());
 
