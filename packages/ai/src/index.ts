@@ -11,3 +11,17 @@ export {
 } from "./extraction/model-inquiry-extraction";
 
 export { toInquiryExtraction } from "./extraction/to-inquiry-extraction";
+export {
+  normalizeCatalogMatchResolutions,
+  type CatalogMatchCandidate,
+  type CatalogMatchContext,
+  type CatalogMatchInput,
+  type CatalogMatcher,
+  type CatalogMatchResolution,
+  type CatalogMatchResult,
+} from "./catalog-match";
+
+export {
+  GeminiCatalogMatcher,
+  type GeminiCatalogMatcherOptions,
+} from "./google/gemini-catalog-matcher";

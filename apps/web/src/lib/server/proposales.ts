@@ -642,18 +642,16 @@ function parseCreatedProposal(
 export async function createProposalesProposal(
   inquiryId: string,
   inquiry: ResolvedInquiry,
+  catalog: ProposalesCatalog,
   selections: readonly ProposalesProductSelection[],
+  allowedVariationIds: readonly number[],
 ): Promise<CreatedProposalesProposal> {
   if (selections.length === 0) {
     throw new ProposalesApiError("INVALID_SELECTION", "Select at least one Proposales product.");
   }
 
   const config = readConfig();
-  const catalog = await loadCatalog(config);
-  const catalogMatch = matchProposalesCatalog(catalog, inquiry.requirements);
-  const requestedVariationIds = new Set(
-    catalogMatch.products.map((product) => product.variationId),
-  );
+  const requestedVariationIds = new Set<number>(allowedVariationIds);
 
   const selectedVariationIds = new Set<number>();
   const blocks: Array<{
