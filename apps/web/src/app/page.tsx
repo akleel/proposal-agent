@@ -45,7 +45,8 @@ export default function Home() {
           <div className="rounded-2xl border border-zinc-200 bg-white p-6">
             <p className="text-sm font-semibold text-zinc-950">03 · Proposal</p>
             <p className="mt-2 text-sm leading-6 text-zinc-600">
-              Deterministic pricing and proposal drafting remain under application control.
+              Reviewed requirements become a real Proposales draft, with commercial data owned by
+              Proposales.
             </p>
           </div>
         </section>
