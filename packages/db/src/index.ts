@@ -8,3 +8,7 @@ export {
   type RateLimitDecision,
   type RateLimitRule,
 } from "./repositories/postgres-rate-limit-repository";
+export {
+  PostgresInquiryCatalogMatchRepository,
+  type PersistedInquiryCatalogMatch,
+} from "./repositories/postgres-inquiry-catalog-match-repository";

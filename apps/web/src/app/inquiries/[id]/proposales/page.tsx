@@ -6,10 +6,10 @@ import { inquiryIdSchema } from "@proposal-agent/contracts";
 import { getInquiryUseCase, getPersistedResolvedInquiryUseCase } from "@/lib/server/inquiries";
 import {
   getProposalesCatalog,
-  matchProposalesCatalog,
   ProposalesApiError,
   type ProposalesCatalog,
 } from "@/lib/server/proposales";
+import { resolveProposalesCatalogMatch } from "@/lib/server/proposales-catalog-matching";
 
 import { ProposalesBuilder } from "./proposales-builder";
 
@@ -115,7 +115,11 @@ export default async function ProposalesInquiryPage({ params }: ProposalesInquir
     );
   }
 
-  const catalogMatch = matchProposalesCatalog(catalogResult.catalog, resolved.inquiry.requirements);
+  const catalogMatch = await resolveProposalesCatalogMatch(
+    parsedId.data,
+    resolved.inquiry,
+    catalogResult.catalog,
+  );
 
   const requestedCatalog: ProposalesCatalog = {
     ...catalogResult.catalog,

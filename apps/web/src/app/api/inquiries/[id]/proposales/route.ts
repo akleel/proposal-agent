@@ -2,9 +2,12 @@ import { consumeDemoWriteRateLimit } from "@/lib/server/demo-rate-limit";
 import { getPersistedResolvedInquiryUseCase } from "@/lib/server/inquiries";
 import {
   createProposalesProposal,
+  getProposalesCatalog,
+  matchProposalesCatalog,
   ProposalesApiError,
   type ProposalesProductSelection,
 } from "@/lib/server/proposales";
+import { getPersistedProposalesCatalogMatch } from "@/lib/server/proposales-catalog-matching";
 
 import { inquiryIdSchema } from "@proposal-agent/contracts";
 import { NextResponse } from "next/server";
@@ -142,7 +145,24 @@ export async function POST(
       );
     }
 
-    const proposal = await createProposalesProposal(parsedId.data, resolved.inquiry, selections);
+    const catalog = await getProposalesCatalog();
+
+    const persistedCatalogMatch = await getPersistedProposalesCatalogMatch(
+      parsedId.data,
+      resolved.inquiry,
+      catalog,
+    );
+
+    const catalogMatch =
+      persistedCatalogMatch ?? matchProposalesCatalog(catalog, resolved.inquiry.requirements);
+
+    const proposal = await createProposalesProposal(
+      parsedId.data,
+      resolved.inquiry,
+      catalog,
+      selections,
+      catalogMatch.products.map((product) => product.variationId),
+    );
 
     return NextResponse.json(
       {
