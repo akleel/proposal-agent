@@ -274,7 +274,7 @@ function ResolvedInquiryPanel({
       </div>
 
       <p className="mt-5 border-t border-emerald-200 pt-4 text-sm font-medium text-emerald-950">
-        Deterministic pricing below consumes this reviewed object instead of raw AI output.
+        Downstream proposal creation consumes this reviewed object instead of raw AI output.
       </p>
     </section>
   );

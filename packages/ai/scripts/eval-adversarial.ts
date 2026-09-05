@@ -61,7 +61,7 @@ assert.doesNotMatch(
 console.log(
   JSON.stringify(
     {
-      model: process.env.GEMINI_MODEL ?? "gpt-5.4-mini",
+      model: process.env.GEMINI_MODEL ?? "gemini-3.6-flash",
       inquiry,
       extraction,
       reviewIssues: getReviewIssues(extraction),
