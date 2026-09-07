@@ -250,6 +250,8 @@ async function resolveCompany(config: ProposalesConfig): Promise<ProposalesCompa
   return company;
 }
 
+// Proposales localized text can contain invisible left-to-right marks; stripping
+// them keeps display and matching stable without maintaining a second catalog.
 function localizedText(value: unknown, language: string): string {
   if (!isRecord(value)) {
     return "";
@@ -270,6 +272,8 @@ function localizedText(value: unknown, language: string): string {
   return "";
 }
 
+// The Content API does not expose enough quantity semantics for this demo.
+// Keep this heuristic isolated from product selection: it only controls arithmetic.
 function inferQuantityMode(title: string): ProposalesQuantityMode {
   const normalized = title.toLowerCase();
 
@@ -528,6 +532,8 @@ function displayNullableText(value: string | null): string {
   return value ?? "Not provided";
 }
 
+// "<" is Proposales modified Markdown syntax for a left-aligned paragraph.
+// It is intentional and is not a standard Markdown list marker.
 function buildProposalDescription(inquiry: ResolvedInquiry): string {
   const eventDetails = [
     "# Event details",
@@ -651,6 +657,8 @@ export async function createProposalesProposal(
   }
 
   const config = readConfig();
+  // Treat browser selections as untrusted: each choice must still exist in the
+  // live catalog and in the server-authorized match for this reviewed inquiry.
   const requestedVariationIds = new Set<number>(allowedVariationIds);
 
   const selectedVariationIds = new Set<number>();
@@ -695,6 +703,8 @@ export async function createProposalesProposal(
 
     const quantity = calculateQuantity(product, selection.amount, inquiry);
 
+    // Proposales v3 expects the variation ID as content_id when adding a Content
+    // Library product block; product_id is not the proposal block identifier.
     blocks.push({
       content_id: product.variationId,
       type: "product-block",
@@ -707,6 +717,8 @@ export async function createProposalesProposal(
     });
   }
 
+  // Do not copy commercial values locally; Proposales applies prices, VAT and
+  // currency from its Content Library when these product blocks are created.
   const createdBody = await requestProposales(config, "/proposals", {
     method: "POST",
     headers: {

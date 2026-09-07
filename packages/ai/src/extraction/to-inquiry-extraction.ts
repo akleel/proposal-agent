@@ -56,6 +56,8 @@ function hasSourceEvidence(rawText: string, source: string | null): boolean {
 function toReviewableField<T>(rawText: string, field: ModelField<T>): ReviewableField<T> {
   const source = stripDecorativeWrappingQuotes(field.source);
 
+  // Model confidence alone does not clear the human-review boundary; the value
+  // must also be present and backed by source text from the original inquiry.
   const requiresReview =
     field.value === null ||
     source === null ||

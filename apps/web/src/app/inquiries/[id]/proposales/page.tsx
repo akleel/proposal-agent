@@ -29,6 +29,8 @@ type CatalogLoadResult =
       readonly message: string;
     };
 
+// This page depends on reviewed database state and the live Proposales catalog,
+// so it must not be reused as static output across requests.
 export const dynamic = "force-dynamic";
 
 async function loadProposalesCatalog(): Promise<CatalogLoadResult> {

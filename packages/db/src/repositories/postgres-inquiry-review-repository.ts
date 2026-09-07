@@ -101,6 +101,8 @@ export class PostgresInquiryReviewRepository implements InquiryReviewRepository 
     extraction: InquiryExtraction,
     extractedAt: Date,
   ): Promise<void> {
+    // A fresh extraction invalidates earlier human decisions, so replace both in one
+    // transaction rather than allowing approvals from old model output to survive.
     const client = await this.pool.connect();
 
     try {

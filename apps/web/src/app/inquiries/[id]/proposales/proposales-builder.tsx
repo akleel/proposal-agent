@@ -124,6 +124,7 @@ function quantityDescription(
   }
 }
 
+// Proposales returns proposal totals in minor currency units.
 function formatMoney(minor: number, currency: string): string {
   return new Intl.NumberFormat("en", {
     style: "currency",

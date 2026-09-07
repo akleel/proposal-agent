@@ -69,6 +69,8 @@ function getVisitorAddress(headerReader: HeaderReader): string {
   return "unknown";
 }
 
+// Persist only an HMAC of the visitor address so demo abuse can be limited
+// without storing the raw network identifier as the rate-limit key.
 function hashRateLimitKey(secret: string, value: string): string {
   return createHmac("sha256", secret).update(value, "utf8").digest("hex");
 }

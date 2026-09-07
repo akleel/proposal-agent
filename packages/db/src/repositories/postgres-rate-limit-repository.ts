@@ -49,6 +49,8 @@ export class PostgresRateLimitRepository {
     const client = await this.pool.connect();
 
     try {
+      // Visitor and global limits must be consumed together; the transaction prevents
+      // a rejected request from incrementing only part of its rate-limit state.
       await client.query("BEGIN");
 
       for (const rule of rules) {
