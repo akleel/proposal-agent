@@ -48,6 +48,8 @@ function createCatalogMatcher(): CatalogMatcher {
       });
 }
 
+// Hash both reviewed intent and live catalog content so persisted AI decisions
+// are reused only while the inputs that justified them are unchanged.
 function createInputHash(inquiry: ResolvedInquiry, catalog: ProposalesCatalog): string {
   const canonicalInput = {
     inquiry: {
@@ -73,6 +75,8 @@ function createInputHash(inquiry: ResolvedInquiry, catalog: ProposalesCatalog): 
   return createHash("sha256").update(JSON.stringify(canonicalInput)).digest("hex");
 }
 
+// Resolve explicit title matches without AI first. Gemini is reserved for
+// customer wording that actually needs semantic interpretation.
 function buildLexicalState(
   inquiry: ResolvedInquiry,
   catalog: ProposalesCatalog,
@@ -205,6 +209,8 @@ export async function resolveProposalesCatalogMatch(
     lexicalState.semanticRequirementIndexes,
   );
 
+  // If semantic matching is unavailable, fall back to the conservative lexical
+  // result rather than broadening the set of products the inquiry can authorize.
   let semanticResult;
 
   try {

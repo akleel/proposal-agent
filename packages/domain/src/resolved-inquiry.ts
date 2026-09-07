@@ -16,6 +16,8 @@ export class InquiryResolutionError extends Error {
   }
 }
 
+// Revalidate persisted review decisions against the current extraction instead
+// of trusting database state as proof that an earlier approval is still valid.
 function validateDecision(extraction: InquiryExtraction, decision: InquiryReviewDecision): void {
   try {
     const input =

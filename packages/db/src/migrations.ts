@@ -53,6 +53,8 @@ export async function runMigrations(
     const migrationChecksum = checksum(sql);
     const existingChecksum = applied.get(filename);
 
+    // Applied migrations are immutable; checksum drift means schema history was
+    // rewritten instead of extended with a new migration.
     if (existingChecksum) {
       if (existingChecksum !== migrationChecksum) {
         throw new Error(`Previously applied migration was modified: ${filename}`);

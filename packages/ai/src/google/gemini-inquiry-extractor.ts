@@ -140,6 +140,8 @@ export class GeminiInquiryExtractor implements InquiryExtractor {
   }
 
   public async extract(rawText: string): Promise<InquiryExtraction> {
+    // Supply time as trusted application context so relative and yearless dates can
+    // be normalized without pretending that context came from the customer.
     const referenceDate = this.referenceDate ?? getCurrentReferenceDate();
 
     const { output } = await generateText({
