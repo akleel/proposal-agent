@@ -1,66 +1,151 @@
 # Testing
 
-## Unit tests
+## Commands
 
-pnpm test
+Deterministic quality gate:
 
-Domain and contract behavior is tested without infrastructure.
+```powershell
+pnpm check
+```
 
-## Integration tests
+This runs:
 
+```text
+format check
+lint
+typecheck
+unit tests
+production build
+```
+
+PostgreSQL integration tests:
+
+```powershell
 pnpm db:up
 pnpm test:integration
+```
 
-Repository integration tests use a real PostgreSQL database.
+Browser E2E:
 
-TEST_DATABASE_URL must never point at production.
+```powershell
+pnpm test:e2e
+```
 
-## Full quality gate
+Visible browser:
 
-pnpm check
+```powershell
+pnpm test:e2e:headed
+```
+
+## Unit tests
+
+### Domain
+
+`packages/domain/tests`
+
+Covers review issues, accepted/corrected decisions, date validation, stale/tampered decisions, and `ResolvedInquiry`.
+
+### Application
+
+`packages/application/tests`
+
+Covers inquiry creation/loading, extraction delegation, review persistence, human decisions, and the `not_extracted` / `review_required` / `ready` states.
+
+Uses fake/in-memory dependencies.
+
+### Contracts
+
+`packages/contracts/tests`
+
+Covers Zod validation for inquiry input, extraction data, dates, confidence, source nullability, and review requests.
+
+### AI
+
+`packages/ai/tests`
+
+Covers deterministic validation around model output, including review thresholds/evidence and catalog variation-ID validation.
+
+These tests do not require a live Gemini call.
+
+## PostgreSQL integration tests
+
+`packages/db/tests/integration`
+
+Covers:
+
+- inquiry persistence
+- extraction/review persistence
+- clearing stale review decisions after re-extraction
+- malformed persisted data rejection
+- atomic rate limiting
+
+Requires the test PostgreSQL database.
 
 ## Browser E2E
 
-Playwright covers three persisted browser flows:
+`tests/e2e/inquiry.spec.ts`
 
-1. create and reload an inquiry;
-2. review an inquiry and calculate authoritative deterministic pricing;
-3. create and reload a persisted review-ready proposal draft.
+Currently verifies the browser inquiry flow:
 
-Pricing and proposal E2E tests use deterministic PostgreSQL fixtures rather
-than requiring a live AI provider call.
+```text
+open app
+-> create inquiry
+-> persist
+-> open inquiry page
+-> reload
+-> inquiry remains available
+```
 
-Run:
+It does not currently run the full live Gemini + Proposales workflow.
 
-    pnpm test:e2e
+## Live Gemini evaluation
 
-## MCP protocol test
+These commands require `GEMINI_API_KEY` and are intentionally separate from deterministic CI.
 
-A real MCP client starts the stdio server as a subprocess and verifies:
+One inquiry:
 
-- MCP 2026-07-28 negotiation;
-- discovery of all four proposal tools;
-- authoritative catalog search;
-- rejection of caller-supplied authority fields.
+```powershell
+pnpm --filter @proposal-agent/ai exec tsx scripts/eval-live.ts
+```
 
-Run:
+Prompt-injection/adversarial cases:
 
-    pnpm --filter @proposal-agent/mcp test:protocol
+```powershell
+pnpm --filter @proposal-agent/ai exec tsx scripts/eval-adversarial.ts
+```
 
-## Deterministic quality gate
+Booking baseline:
 
-Run:
+```powershell
+pnpm --filter @proposal-agent/ai exec tsx scripts/eval-bookings.ts
+```
 
-    pnpm check
+The booking baseline covers normal bookings, dates, durations, requirements, semantic wording, ambiguity, negation, typos, and unsupported concepts.
 
-The quality gate runs linting, workspace type checking, unit tests,
-PostgreSQL integration tests, and the Next.js production build.
+## Proposales testing status
 
-Live AI evaluations remain separate because deterministic CI must not depend
-on provider availability, latency, or model variance.
+The Proposales adapter is exercised through application use and build/type checks, but there is no deterministic mock/integration suite covering the complete Proposales API flow yet.
 
-## Continuous integration
+A useful next test would mock the Proposales HTTP boundary and verify:
 
-GitHub Actions provisions an isolated PostgreSQL service and runs dependency
-installation, linting, type checking, unit tests, migrations, integration
-tests, production build, Playwright browser E2E, and report upload.
+- company/catalog parsing
+- proposal request payloads
+- upstream error mapping
+- unauthorized variation rejection
+- quantity calculation
+
+## CI
+
+GitHub Actions currently runs:
+
+```text
+lint
+typecheck
+unit tests
+database migration
+PostgreSQL integration tests
+production build
+Playwright E2E
+```
+
+Live Gemini and Proposales calls stay outside deterministic CI because they require external credentials and provider availability.
